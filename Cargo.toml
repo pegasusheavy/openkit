@@ -3,8 +3,8 @@ members = [".", "openkit-macros"]
 
 [package]
 name = "openkit"
-version = "0.1.1"
-edition = "2021"
+version = "0.1.2"
+edition = "2024"
 description = "A cross-platform CSS-styled UI framework for Rust"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/pegasusheavy/openkit"
@@ -14,7 +14,7 @@ readme = "README.md"
 authors = ["Pegasus Heavy Industries"]
 keywords = ["gui", "ui", "css", "cross-platform", "desktop"]
 categories = ["gui", "rendering"]
-rust-version = "1.75"
+rust-version = "1.85"
 
 [features]
 default = ["gpu", "macros"]
@@ -23,7 +23,7 @@ macros = ["openkit-macros"]
 
 [dependencies]
 # Proc macros (optional, enabled by default)
-openkit-macros = { version = "0.1.1", path = "openkit-macros", optional = true }
+openkit-macros = { version = "0.1.2", path = "openkit-macros", optional = true }
 # Windowing
 winit = "0.30"
 
