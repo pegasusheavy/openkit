@@ -1,6 +1,6 @@
 //! Painter API for drawing primitives.
 
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::geometry::{BorderRadius, Color, Point, Rect};
 
 /// A painter for drawing primitives.
 #[derive(Debug, Default)]

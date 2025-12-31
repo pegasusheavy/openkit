@@ -33,7 +33,6 @@ pub use selector::{Selector, SelectorPart, PseudoClass, Specificity};
 pub use stylesheet::{StyleSheet, StyleRule, StyleSheetBuilder, RuleBuilder};
 pub use value::{CssValue, Length, LengthUnit};
 
-use crate::geometry::{Color, BorderRadius, EdgeInsets};
 use crate::theme::ThemeData;
 use std::collections::HashMap;
 use std::sync::Arc;

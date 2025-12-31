@@ -349,50 +349,47 @@ impl Widget for Slider {
             return EventResult::Ignored;
         }
 
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
-                let thumb = self.thumb_rect(self.bounds());
-                let in_thumb = thumb.contains(mouse.position);
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
+            let thumb = self.thumb_rect(self.bounds());
+            let in_thumb = thumb.contains(mouse.position);
 
-                match mouse.kind {
-                    MouseEventKind::Move => {
-                        if self.dragging {
-                            let new_value = self.position_to_value(mouse.position, self.bounds());
-                            self.set_value(new_value);
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
+            match mouse.kind {
+                MouseEventKind::Move => {
+                    if self.dragging {
+                        let new_value = self.position_to_value(mouse.position, self.bounds());
+                        self.set_value(new_value);
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
 
-                        if (in_bounds || in_thumb) && !self.base.state.hovered {
-                            self.base.state.hovered = true;
-                            ctx.request_redraw();
-                        } else if !in_bounds && !in_thumb && self.base.state.hovered && !self.dragging {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
+                    if (in_bounds || in_thumb) && !self.base.state.hovered {
+                        self.base.state.hovered = true;
+                        ctx.request_redraw();
+                    } else if !in_bounds && !in_thumb && self.base.state.hovered && !self.dragging {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Down if mouse.button == Some(MouseButton::Left) => {
-                        if in_bounds || in_thumb {
-                            self.dragging = true;
-                            ctx.request_focus(self.base.id);
-                            let new_value = self.position_to_value(mouse.position, self.bounds());
-                            self.set_value(new_value);
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
-                        if self.dragging {
-                            self.dragging = false;
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Down if mouse.button == Some(MouseButton::Left) => {
+                    if in_bounds || in_thumb {
+                        self.dragging = true;
+                        ctx.request_focus(self.base.id);
+                        let new_value = self.position_to_value(mouse.position, self.bounds());
+                        self.set_value(new_value);
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
+                    if self.dragging {
+                        self.dragging = false;
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

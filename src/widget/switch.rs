@@ -237,7 +237,7 @@ impl Widget for ToggleSwitch {
 
         // Label
         if let Some(ref label) = self.label {
-            let (switch_width, switch_height) = self.size.dimensions();
+            let (switch_width, _switch_height) = self.size.dimensions();
             let label_x = rect.x() + switch_width + 12.0;
             let label_y = rect.y() + (rect.height() + 12.0) / 2.0;
 
@@ -267,35 +267,32 @@ impl Widget for ToggleSwitch {
             return EventResult::Ignored;
         }
 
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
 
-                match mouse.kind {
-                    MouseEventKind::Move | MouseEventKind::Enter => {
-                        if in_bounds && !self.base.state.hovered {
-                            self.base.state.hovered = true;
-                            ctx.request_redraw();
-                        } else if !in_bounds && self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Leave => {
-                        if self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Up if mouse.button == Some(MouseButton::Left) && in_bounds => {
-                        self.toggle();
+            match mouse.kind {
+                MouseEventKind::Move | MouseEventKind::Enter => {
+                    if in_bounds && !self.base.state.hovered {
+                        self.base.state.hovered = true;
                         ctx.request_redraw();
-                        return EventResult::Handled;
+                    } else if !in_bounds && self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
                     }
-                    _ => {}
                 }
+                MouseEventKind::Leave => {
+                    if self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Up if mouse.button == Some(MouseButton::Left) && in_bounds => {
+                    self.toggle();
+                    ctx.request_redraw();
+                    return EventResult::Handled;
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

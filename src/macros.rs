@@ -589,6 +589,7 @@ macro_rules! dbg_widget {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
     use crate::widget::Widget;
 

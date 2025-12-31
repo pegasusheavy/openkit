@@ -229,7 +229,7 @@ pub fn component(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn prop(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn prop(_attr: TokenStream, item: TokenStream) -> TokenStream {
     // This is handled by the Component derive macro
     // The attribute just marks the field
     item
@@ -249,7 +249,7 @@ pub fn prop(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn state(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn state(_attr: TokenStream, item: TokenStream) -> TokenStream {
     // This is handled by the Component derive macro
     item
 }
@@ -271,7 +271,7 @@ pub fn state(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn event(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn event(_attr: TokenStream, item: TokenStream) -> TokenStream {
     // This is handled by the Component derive macro
     item
 }

@@ -109,7 +109,7 @@ impl Widget for Spacer {
         }
     }
 
-    fn layout(&mut self, constraints: Constraints, ctx: &LayoutContext) -> LayoutResult {
+    fn layout(&mut self, constraints: Constraints, _ctx: &LayoutContext) -> LayoutResult {
         let size = if let Some(fixed) = self.fixed_size {
             Size::new(
                 constraints.constrain(Size::new(fixed, 0.0)).width,

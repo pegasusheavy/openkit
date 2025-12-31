@@ -117,7 +117,7 @@ impl StyleSheetBuilder {
     }
 
     /// Add a rule for a class selector.
-    pub fn class(mut self, name: &str) -> RuleBuilder {
+    pub fn class(self, name: &str) -> RuleBuilder {
         RuleBuilder {
             builder: self,
             selector: Selector::class(name),
@@ -126,7 +126,7 @@ impl StyleSheetBuilder {
     }
 
     /// Add a rule for a type selector.
-    pub fn type_selector(mut self, name: &str) -> RuleBuilder {
+    pub fn type_selector(self, name: &str) -> RuleBuilder {
         RuleBuilder {
             builder: self,
             selector: Selector::type_selector(name),

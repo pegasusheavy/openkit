@@ -32,14 +32,11 @@ use crate::event::{Event, WindowEvent};
 use crate::geometry::{Rect, Size};
 use crate::layout::Constraints;
 use crate::platform::{Platform, PlatformEvent, PlatformError, Window, WindowBuilder};
-use crate::render::{Painter, Renderer};
+use crate::render::Renderer;
 use crate::theme::{Theme, ThemeData};
 use crate::widget::{EventContext, LayoutContext, PaintContext, Widget};
 
-use std::collections::HashMap;
 use std::sync::Arc;
-use winit::event_loop::ActiveEventLoop;
-use winit::window::WindowId;
 
 /// Application builder and runner.
 pub struct App {

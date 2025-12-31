@@ -3,7 +3,7 @@
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
 use crate::css::{ClassList, WidgetState};
 use crate::event::{Event, EventResult, MouseEventKind, MouseButton};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::geometry::{BorderRadius, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -255,7 +255,7 @@ impl Widget for ScrollView {
 
         // Paint content (with clipping conceptually - real clipping needs render layer support)
         if let Some(content) = &self.content {
-            let viewport = Rect::new(
+            let _viewport = Rect::new(
                 rect.x(),
                 rect.y(),
                 self.viewport_width(),

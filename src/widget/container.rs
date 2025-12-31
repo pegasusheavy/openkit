@@ -1,7 +1,7 @@
 //! Container widgets (Column, Row).
 
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
-use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
+use crate::css::{ClassList, WidgetState};
 use crate::css::FlexDirection;
 use crate::event::{Event, EventResult};
 use crate::geometry::{EdgeInsets, Point, Rect, Size};

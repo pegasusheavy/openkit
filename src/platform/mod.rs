@@ -8,15 +8,14 @@ mod window;
 pub use window::{Window, WindowBuilder, WindowConfig};
 
 use crate::event::{Event, KeyEvent, KeyEventKind, Key, Modifiers, MouseButton, MouseEvent, MouseEventKind, WindowEvent};
-use crate::geometry::{Point, Size};
+use crate::geometry::Point;
 use crate::theme::Theme;
 
-use std::sync::Arc;
 use winit::application::ApplicationHandler;
-use winit::dpi::{LogicalSize, PhysicalPosition, PhysicalSize};
+use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, WindowEvent as WinitWindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
-use winit::window::{WindowId, Window as WinitWindow};
+use winit::window::WindowId;
 
 /// Platform abstraction for running the application.
 pub struct Platform {
@@ -35,7 +34,7 @@ impl Platform {
     }
 
     /// Run the application event loop.
-    pub fn run<F>(mut self, mut handler: F) -> Result<(), PlatformError>
+    pub fn run<F>(mut self, handler: F) -> Result<(), PlatformError>
     where
         F: FnMut(&ActiveEventLoop, PlatformEvent) + 'static,
     {
@@ -77,6 +76,7 @@ pub enum PlatformEvent {
 }
 
 /// Platform-specific application handler.
+#[allow(clippy::type_complexity)]
 struct PlatformApp {
     handler: Box<dyn FnMut(&ActiveEventLoop, PlatformEvent)>,
 }
@@ -171,10 +171,7 @@ impl ApplicationHandler for PlatformApp {
                     ElementState::Released => KeyEventKind::Up,
                 };
                 let key = convert_key(&event.logical_key);
-                let text = match &event.text {
-                    Some(t) => Some(t.to_string()),
-                    None => None,
-                };
+                let text = event.text.as_ref().map(|t| t.to_string());
                 Some(Event::Key(KeyEvent {
                     kind,
                     key,

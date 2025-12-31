@@ -1,8 +1,7 @@
 //! CSS property definitions and computed styles.
 
-use crate::css::{CssValue, Length, LengthUnit, StyleContext};
+use crate::css::{CssValue, StyleContext};
 use crate::geometry::{BorderRadius, Color, EdgeInsets};
-use std::collections::HashMap;
 
 /// A style property name.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

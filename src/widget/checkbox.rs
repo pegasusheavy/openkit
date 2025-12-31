@@ -1,9 +1,9 @@
 //! Checkbox widget.
 
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
-use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
-use crate::event::{Event, EventResult, MouseEvent, MouseEventKind, MouseButton};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::css::{ClassList, WidgetState};
+use crate::event::{Event, EventResult, MouseEventKind, MouseButton};
+use crate::geometry::{BorderRadius, Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -106,7 +106,7 @@ impl Widget for Checkbox {
         self.base.state
     }
 
-    fn intrinsic_size(&self, ctx: &LayoutContext) -> Size {
+    fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
         let box_size = 20.0;
         let gap = 8.0;
         let label_width = self.label.as_ref().map(|l| l.len() as f32 * 8.0).unwrap_or(0.0);
@@ -193,48 +193,45 @@ impl Widget for Checkbox {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
 
-                match mouse.kind {
-                    MouseEventKind::Enter | MouseEventKind::Move => {
-                        if in_bounds && !self.base.state.hovered {
-                            self.base.state.hovered = true;
-                            ctx.request_redraw();
-                        } else if !in_bounds && self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
+            match mouse.kind {
+                MouseEventKind::Enter | MouseEventKind::Move => {
+                    if in_bounds && !self.base.state.hovered {
+                        self.base.state.hovered = true;
+                        ctx.request_redraw();
+                    } else if !in_bounds && self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Leave => {
-                        if self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Down => {
-                        if in_bounds && mouse.button == Some(MouseButton::Left) {
-                            self.base.state.pressed = true;
-                            ctx.request_focus(self.base.id);
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    MouseEventKind::Up => {
-                        if self.base.state.pressed && mouse.button == Some(MouseButton::Left) {
-                            self.base.state.pressed = false;
-                            if in_bounds {
-                                self.toggle();
-                            }
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Leave => {
+                    if self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Down => {
+                    if in_bounds && mouse.button == Some(MouseButton::Left) {
+                        self.base.state.pressed = true;
+                        ctx.request_focus(self.base.id);
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                MouseEventKind::Up => {
+                    if self.base.state.pressed && mouse.button == Some(MouseButton::Left) {
+                        self.base.state.pressed = false;
+                        if in_bounds {
+                            self.toggle();
+                        }
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

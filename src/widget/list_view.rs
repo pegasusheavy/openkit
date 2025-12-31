@@ -3,7 +3,7 @@
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
 use crate::css::{ClassList, WidgetState};
 use crate::event::{Event, EventResult, MouseEventKind, MouseButton, Key, KeyEventKind};
-use crate::geometry::{Color, Point, Rect, Size};
+use crate::geometry::{Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -85,6 +85,7 @@ pub enum SelectionMode {
 ///     .on_select(|id| println!("Selected: {}", id))
 ///     .on_activate(|id| println!("Activated: {}", id));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct ListView {
     base: WidgetBase,
     items: Vec<ListItem>,

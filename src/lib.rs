@@ -7,20 +7,18 @@
 //!
 //! ## Quick Start
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use openkit::prelude::*;
 //!
-//! fn main() {
-//!     App::new()
-//!         .title("My App")
-//!         .theme(Theme::Auto)
-//!         .run(|| {
-//!             col![16;
-//!                 label!("Hello, OpenKit!"),
-//!                 button!("Click me", { println!("Clicked!"); }),
-//!             ]
-//!         });
-//! }
+//! App::new()
+//!     .title("My App")
+//!     .theme(Theme::Auto)
+//!     .run(|| {
+//!         col![16;
+//!             label!("Hello, OpenKit!"),
+//!             button!("Click me", { println!("Clicked!"); }),
+//!         ]
+//!     });
 //! ```
 //!
 //! ## Declarative Macros

@@ -1,6 +1,6 @@
 //! CSS parser using the cssparser crate.
 
-use cssparser::{Parser, ParserInput, Token, ParseError, CowRcStr};
+use cssparser::{Parser, ParserInput, Token, ParseError};
 use crate::css::{
     CssValue, Length, LengthUnit, Selector, SelectorPart, PseudoClass,
     StyleProperty, StyleRule, StyleSheet,
@@ -85,7 +85,7 @@ impl CssParser {
                 Token::Colon => {
                     // Pseudo-class
                     if let Ok(Token::Ident(name)) = parser.next() {
-                        if let Some(pseudo) = PseudoClass::from_name(&name) {
+                        if let Some(pseudo) = PseudoClass::from_name(name) {
                             parts.push(SelectorPart::PseudoClass(pseudo));
                         }
                     }
@@ -130,7 +130,7 @@ impl CssParser {
 
             // Skip colon
             parser.skip_whitespace();
-            if let Err(_) = parser.expect_colon() {
+            if parser.expect_colon().is_err() {
                 continue;
             }
 
@@ -168,7 +168,7 @@ impl CssParser {
             }
             Token::Hash(hash) | Token::IDHash(hash) => {
                 // Hex color
-                if let Some(color) = Color::from_hex(&hash) {
+                if let Some(color) = Color::from_hex(hash) {
                     Ok(CssValue::Color(color))
                 } else {
                     Err(CssParseError::InvalidValue)
@@ -181,7 +181,7 @@ impl CssParser {
                 Ok(CssValue::Percentage(*unit_value * 100.0))
             }
             Token::Dimension { value, unit, .. } => {
-                if let Some(length_unit) = LengthUnit::from_str(&unit) {
+                if let Some(length_unit) = LengthUnit::parse(unit) {
                     Ok(CssValue::Length(Length::new(*value, length_unit)))
                 } else {
                     Err(CssParseError::InvalidValue)
@@ -311,7 +311,7 @@ impl CssParser {
 
     /// Parse inline style string.
     pub fn parse_inline_style(style: &str) -> HashMap<StyleProperty, CssValue> {
-        let mut declarations = HashMap::new();
+        let declarations = HashMap::new();
         let css = format!("x {{ {} }}", style);
 
         if let Ok(stylesheet) = Self::parse_stylesheet(&css) {

@@ -230,6 +230,7 @@ impl DesktopIcon {
 ///         Color::BLACK.with_alpha(0.3),
 ///     ));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct Desktop {
     base: WidgetBase,
     /// Background/wallpaper configuration
@@ -656,63 +657,60 @@ impl Widget for Desktop {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        match event {
-            Event::Mouse(mouse) => {
-                match mouse.kind {
-                    MouseEventKind::Move => {
-                        let icon = self.icon_at_point(mouse.position);
-                        let new_hovered = icon.map(|i| i.id.clone());
-                        if new_hovered != self.hovered_icon {
-                            self.hovered_icon = new_hovered;
-                            ctx.request_redraw();
-                        }
+        if let Event::Mouse(mouse) = event {
+            match mouse.kind {
+                MouseEventKind::Move => {
+                    let icon = self.icon_at_point(mouse.position);
+                    let new_hovered = icon.map(|i| i.id.clone());
+                    if new_hovered != self.hovered_icon {
+                        self.hovered_icon = new_hovered;
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Down if mouse.button == Some(MouseButton::Left) => {
-                        if let Some(icon) = self.icon_at_point(mouse.position) {
-                            let icon_id = icon.id.clone();
-
-                            // Check for double-click
-                            let now = std::time::Instant::now();
-                            let is_double_click = if let (Some(last_time), Some(last_id)) =
-                                (&self.last_click_time, &self.last_click_id)
-                            {
-                                now.duration_since(*last_time).as_millis() < 500 && last_id == &icon_id
-                            } else {
-                                false
-                            };
-
-                            if is_double_click {
-                                if let Some(handler) = &self.on_icon_double_click {
-                                    handler(&icon_id);
-                                }
-                                self.last_click_time = None;
-                                self.last_click_id = None;
-                            } else {
-                                self.select_icon(&icon_id);
-                                if let Some(handler) = &self.on_icon_click {
-                                    handler(&icon_id);
-                                }
-                                self.last_click_time = Some(now);
-                                self.last_click_id = Some(icon_id);
-                            }
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        } else {
-                            // Clicked on empty space - clear selection
-                            self.clear_selection();
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Down if mouse.button == Some(MouseButton::Right) => {
-                        if let Some(handler) = &self.on_right_click {
-                            handler(mouse.position);
-                        }
-                        return EventResult::Handled;
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Down if mouse.button == Some(MouseButton::Left) => {
+                    if let Some(icon) = self.icon_at_point(mouse.position) {
+                        let icon_id = icon.id.clone();
+
+                        // Check for double-click
+                        let now = std::time::Instant::now();
+                        let is_double_click = if let (Some(last_time), Some(last_id)) =
+                            (&self.last_click_time, &self.last_click_id)
+                        {
+                            now.duration_since(*last_time).as_millis() < 500 && last_id == &icon_id
+                        } else {
+                            false
+                        };
+
+                        if is_double_click {
+                            if let Some(handler) = &self.on_icon_double_click {
+                                handler(&icon_id);
+                            }
+                            self.last_click_time = None;
+                            self.last_click_id = None;
+                        } else {
+                            self.select_icon(&icon_id);
+                            if let Some(handler) = &self.on_icon_click {
+                                handler(&icon_id);
+                            }
+                            self.last_click_time = Some(now);
+                            self.last_click_id = Some(icon_id);
+                        }
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    } else {
+                        // Clicked on empty space - clear selection
+                        self.clear_selection();
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Down if mouse.button == Some(MouseButton::Right) => {
+                    if let Some(handler) = &self.on_right_click {
+                        handler(mouse.position);
+                    }
+                    return EventResult::Handled;
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

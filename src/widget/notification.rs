@@ -36,6 +36,7 @@ pub enum NotificationUrgency {
 ///     .on_action(|action| println!("Action: {}", action))
 ///     .on_close(|| println!("Notification closed"));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct Notification {
     base: WidgetBase,
     title: String,
@@ -308,55 +309,52 @@ impl Widget for Notification {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
-                let close_rect = self.get_close_button_rect();
-                let in_close = close_rect.contains(mouse.position);
-                let action_rects = self.get_action_rects();
-                let in_action = action_rects.iter().position(|r| r.contains(mouse.position));
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
+            let close_rect = self.get_close_button_rect();
+            let in_close = close_rect.contains(mouse.position);
+            let action_rects = self.get_action_rects();
+            let in_action = action_rects.iter().position(|r| r.contains(mouse.position));
 
-                match mouse.kind {
-                    MouseEventKind::Move => {
-                        let old_close = self.close_hovered;
-                        let old_action = self.hovered_action;
+            match mouse.kind {
+                MouseEventKind::Move => {
+                    let old_close = self.close_hovered;
+                    let old_action = self.hovered_action;
 
-                        self.close_hovered = in_close;
-                        self.hovered_action = in_action;
+                    self.close_hovered = in_close;
+                    self.hovered_action = in_action;
 
-                        if old_close != self.close_hovered || old_action != self.hovered_action {
-                            ctx.request_redraw();
-                        }
+                    if old_close != self.close_hovered || old_action != self.hovered_action {
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
-                        if in_close {
-                            if let Some(handler) = &self.on_close {
-                                handler();
-                            }
-                            return EventResult::Handled;
-                        }
-
-                        if let Some(action_idx) = in_action {
-                            if let Some((id, _)) = self.actions.get(action_idx) {
-                                let id = id.clone();
-                                if let Some(handler) = &self.on_action {
-                                    handler(&id);
-                                }
-                                return EventResult::Handled;
-                            }
-                        }
-
-                        if in_bounds {
-                            if let Some(handler) = &self.on_click {
-                                handler();
-                            }
-                            return EventResult::Handled;
-                        }
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
+                    if in_close {
+                        if let Some(handler) = &self.on_close {
+                            handler();
+                        }
+                        return EventResult::Handled;
+                    }
+
+                    if let Some(action_idx) = in_action {
+                        if let Some((id, _)) = self.actions.get(action_idx) {
+                            let id = id.clone();
+                            if let Some(handler) = &self.on_action {
+                                handler(&id);
+                            }
+                            return EventResult::Handled;
+                        }
+                    }
+
+                    if in_bounds {
+                        if let Some(handler) = &self.on_click {
+                            handler();
+                        }
+                        return EventResult::Handled;
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

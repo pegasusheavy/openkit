@@ -89,7 +89,7 @@ impl Selector {
                         return false;
                     }
                 }
-                SelectorPart::Attribute { name, op, value } => {
+                SelectorPart::Attribute { name: _, op: _, value: _ } => {
                     // TODO: Implement attribute matching
                     return false;
                 }

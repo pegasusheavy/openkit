@@ -62,6 +62,7 @@ pub struct Spinner {
     base: WidgetBase,
     size: SpinnerSize,
     color: Option<Color>,
+    #[allow(dead_code)]
     rotation: f32,
 }
 
@@ -144,7 +145,7 @@ impl Widget for Spinner {
         let radius = (size - stroke) / 2.0;
 
         // Draw background circle (track)
-        let track_color = color.with_alpha(0.2);
+        let _track_color = color.with_alpha(0.2);
 
         // Draw a simple circular representation
         // In a real implementation, we'd draw proper arcs

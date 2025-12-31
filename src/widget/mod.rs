@@ -30,10 +30,16 @@ pub mod window;
 pub mod workspace;
 
 use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
-use crate::event::{Event, EventResult, MouseEvent};
+use crate::event::{Event, EventResult};
 use crate::geometry::{Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
+
+/// Type alias for event callback handlers to reduce type complexity.
+pub type EventCallback<T = ()> = Option<Box<dyn Fn() -> T + Send + Sync>>;
+
+/// Type alias for event handlers that take a string parameter.
+pub type StringCallback = Option<Box<dyn Fn(&str) + Send + Sync>>;
 
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -77,12 +83,12 @@ pub trait Widget {
     fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext);
 
     /// Handle an event.
-    fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
+    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventContext) -> EventResult {
         EventResult::Ignored
     }
 
     /// Get the computed style for this widget.
-    fn style(&self, ctx: &StyleContext) -> ComputedStyle {
+    fn style(&self, _ctx: &StyleContext) -> ComputedStyle {
         ComputedStyle::default()
     }
 

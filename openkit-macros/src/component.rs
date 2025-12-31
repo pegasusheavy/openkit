@@ -2,9 +2,9 @@
 
 use proc_macro2::TokenStream;
 use quote::{quote, format_ident};
-use syn::{DeriveInput, Data, Fields, Error, Ident, ItemFn, Meta, Lit, Token, LitStr};
+use syn::{DeriveInput, Data, Fields, Error, Ident, ItemFn, Meta, Token, LitStr};
 use syn::parse::{Parse, ParseStream};
-use darling::{FromDeriveInput, FromField, FromMeta};
+use darling::FromDeriveInput;
 
 /// Parsed component attribute arguments.
 #[derive(Debug, Default)]
@@ -37,6 +37,7 @@ impl Parse for ComponentAttrArgs {
 /// Attributes for the Component derive macro.
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(component))]
+#[allow(dead_code)]
 struct ComponentAttrs {
     ident: Ident,
 

@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity)]
 //! Angular-inspired component system for OpenKit.
 //!
 //! This module provides a component-based architecture similar to Angular:
@@ -36,7 +37,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use std::sync::Arc;
 
 /// Component lifecycle hooks.
 pub trait Lifecycle {

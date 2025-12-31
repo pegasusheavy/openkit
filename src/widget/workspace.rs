@@ -3,7 +3,7 @@
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
 use crate::css::{ClassList, WidgetState};
 use crate::event::{Event, EventResult, MouseEventKind, MouseButton};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::geometry::{BorderRadius, Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -31,6 +31,7 @@ impl WorkspaceItem {
 }
 
 /// Workspace switcher widget.
+#[allow(clippy::type_complexity)]
 pub struct WorkspaceSwitcher {
     base: WidgetBase,
     workspaces: Vec<WorkspaceItem>,

@@ -3,7 +3,7 @@
 //! Implements flexbox-style layout.
 
 use crate::css::{AlignItems, ComputedStyle, FlexDirection, JustifyContent};
-use crate::geometry::{EdgeInsets, Point, Rect, Size};
+use crate::geometry::{EdgeInsets, Point, Size};
 
 /// Layout constraints for a widget.
 #[derive(Debug, Clone, Copy)]
@@ -317,7 +317,8 @@ impl FlexLayout {
                 Alignment::Start => cross_start,
                 Alignment::End => cross_start + cross_size - child_cross,
                 Alignment::Center => cross_start + (cross_size - child_cross) / 2.0,
-                Alignment::Stretch | _ => cross_start,
+                // SpaceBetween, SpaceAround, SpaceEvenly are handled by the main axis calculation
+                Alignment::Stretch | Alignment::SpaceBetween | Alignment::SpaceAround | Alignment::SpaceEvenly => cross_start,
             };
 
             let point = if is_vertical {

@@ -63,6 +63,7 @@ impl TrayIcon {
 ///     .on_click(|id| println!("Clicked: {}", id))
 ///     .on_right_click(|id| println!("Right-clicked: {}", id));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct SystemTray {
     base: WidgetBase,
     icons: Vec<TrayIcon>,
@@ -208,7 +209,7 @@ impl Widget for SystemTray {
         LayoutResult::new(size)
     }
 
-    fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
+    fn paint(&self, painter: &mut Painter, _rect: Rect, ctx: &PaintContext) {
         let theme = ctx.style_ctx.theme;
 
         for (i, icon) in self.icons.iter().enumerate() {
@@ -259,46 +260,43 @@ impl Widget for SystemTray {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        match event {
-            Event::Mouse(mouse) => {
-                match mouse.kind {
-                    MouseEventKind::Move => {
-                        let new_hovered = self.icon_at_point(mouse.position)
-                            .map(|i| self.icons[i].id.clone());
+        if let Event::Mouse(mouse) = event {
+            match mouse.kind {
+                MouseEventKind::Move => {
+                    let new_hovered = self.icon_at_point(mouse.position)
+                        .map(|i| self.icons[i].id.clone());
 
-                        if new_hovered != self.hovered_icon {
-                            self.hovered_icon = new_hovered;
-                            ctx.request_redraw();
-                        }
+                    if new_hovered != self.hovered_icon {
+                        self.hovered_icon = new_hovered;
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Leave => {
-                        if self.hovered_icon.is_some() {
-                            self.hovered_icon = None;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
-                        if let Some(index) = self.icon_at_point(mouse.position) {
-                            let id = self.icons[index].id.clone();
-                            if let Some(handler) = &self.on_click {
-                                handler(&id);
-                            }
-                            return EventResult::Handled;
-                        }
-                    }
-                    MouseEventKind::Up if mouse.button == Some(MouseButton::Right) => {
-                        if let Some(index) = self.icon_at_point(mouse.position) {
-                            let id = self.icons[index].id.clone();
-                            if let Some(handler) = &self.on_right_click {
-                                handler(&id);
-                            }
-                            return EventResult::Handled;
-                        }
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Leave => {
+                    if self.hovered_icon.is_some() {
+                        self.hovered_icon = None;
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Up if mouse.button == Some(MouseButton::Left) => {
+                    if let Some(index) = self.icon_at_point(mouse.position) {
+                        let id = self.icons[index].id.clone();
+                        if let Some(handler) = &self.on_click {
+                            handler(&id);
+                        }
+                        return EventResult::Handled;
+                    }
+                }
+                MouseEventKind::Up if mouse.button == Some(MouseButton::Right) => {
+                    if let Some(index) = self.icon_at_point(mouse.position) {
+                        let id = self.icons[index].id.clone();
+                        if let Some(handler) = &self.on_right_click {
+                            handler(&id);
+                        }
+                        return EventResult::Handled;
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

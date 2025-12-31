@@ -137,6 +137,7 @@ impl TailwindPalette {
     pub const GRAY_400: Color = Color::rgb(0.612, 0.639, 0.686);
     pub const GRAY_500: Color = Color::rgb(0.420, 0.451, 0.502);
     pub const GRAY_600: Color = Color::rgb(0.294, 0.333, 0.388);
+    #[allow(clippy::approx_constant)]
     pub const GRAY_700: Color = Color::rgb(0.216, 0.255, 0.318);
     pub const GRAY_800: Color = Color::rgb(0.122, 0.161, 0.216);
     pub const GRAY_900: Color = Color::rgb(0.067, 0.098, 0.153);

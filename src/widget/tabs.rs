@@ -93,6 +93,7 @@ impl Tab {
 ///     .selected("general")
 ///     .on_change(|id| println!("Tab changed: {}", id));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct Tabs {
     base: WidgetBase,
     tabs: Vec<Tab>,

@@ -13,7 +13,7 @@ use std::sync::Arc;
 fn main() {
     // Use Arc<AtomicI32> for thread-safe state that can be shared across closures
     let count = Arc::new(AtomicI32::new(0));
-    let items = vec!["Apple", "Banana", "Cherry", "Date"];
+    let items = ["Apple", "Banana", "Cherry", "Date"];
     let show_list = true;
     let status = "ready";
 

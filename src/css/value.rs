@@ -1,7 +1,6 @@
 //! CSS value types.
 
 use crate::geometry::Color;
-use ordered_float::OrderedFloat;
 
 /// A CSS value.
 #[derive(Debug, Clone, PartialEq)]
@@ -137,7 +136,8 @@ pub enum LengthUnit {
 }
 
 impl LengthUnit {
-    pub fn from_str(s: &str) -> Option<Self> {
+    /// Parse a length unit from a string.
+    pub fn parse(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "px" => Some(LengthUnit::Px),
             "rem" => Some(LengthUnit::Rem),
@@ -219,8 +219,11 @@ fn color_from_keyword(keyword: &str) -> Option<Color> {
 
 /// Timing function for transitions/animations.
 #[derive(Debug, Clone, PartialEq)]
+#[derive(Default)]
+#[allow(dead_code)]
 pub enum TimingFunction {
     Linear,
+    #[default]
     Ease,
     EaseIn,
     EaseOut,
@@ -231,6 +234,7 @@ pub enum TimingFunction {
 
 impl TimingFunction {
     /// Evaluate the timing function at time t (0.0 to 1.0).
+    #[allow(dead_code)]
     pub fn evaluate(&self, t: f32) -> f32 {
         match self {
             TimingFunction::Linear => t,
@@ -250,28 +254,25 @@ impl TimingFunction {
     }
 }
 
-impl Default for TimingFunction {
-    fn default() -> Self {
-        TimingFunction::Ease
-    }
-}
 
 /// Step position for steps() timing function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum StepPosition {
     Start,
     End,
 }
 
 /// Evaluate a cubic bezier curve at time t.
-fn cubic_bezier(x1: f32, y1: f32, x2: f32, y2: f32, t: f32) -> f32 {
+#[allow(dead_code)]
+fn cubic_bezier(_x1: f32, y1: f32, _x2: f32, y2: f32, t: f32) -> f32 {
     // Simple approximation using Newton-Raphson method
     // For a proper implementation, would need to solve for t from x
     let t2 = t * t;
     let t3 = t2 * t;
     let mt = 1.0 - t;
     let mt2 = mt * mt;
-    let mt3 = mt2 * mt;
+    let _mt3 = mt2 * mt;
 
     // Simplified: assume x roughly equals t for typical easing curves
     3.0 * mt2 * t * y1 + 3.0 * mt * t2 * y2 + t3

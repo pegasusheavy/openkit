@@ -1,8 +1,7 @@
 //! Label widget for displaying text.
 
-use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
+use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext};
 use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
-use crate::event::{Event, EventResult};
 use crate::geometry::{Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
@@ -73,7 +72,7 @@ impl Widget for Label {
         self.base.state
     }
 
-    fn intrinsic_size(&self, ctx: &LayoutContext) -> Size {
+    fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
         // Estimate text size based on font size
         let style = self.computed_style.as_ref().map(|s| s.font_size).unwrap_or(16.0);
         let char_width = style * 0.6; // Approximate average character width
@@ -100,11 +99,12 @@ impl Widget for Label {
     }
 
     fn style(&self, ctx: &StyleContext) -> ComputedStyle {
-        let mut style = ComputedStyle::default();
-        style.color = ctx.theme.colors.foreground;
-        style.font_size = ctx.theme.typography.base_size;
-        style.line_height = ctx.theme.typography.line_height;
-        style
+        ComputedStyle {
+            color: ctx.theme.colors.foreground,
+            font_size: ctx.theme.typography.base_size,
+            line_height: ctx.theme.typography.line_height,
+            ..Default::default()
+        }
     }
 
     fn bounds(&self) -> Rect {

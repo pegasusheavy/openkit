@@ -8,6 +8,7 @@ use darling::FromDeriveInput;
 /// Attributes for the Widget derive macro.
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(widget))]
+#[allow(dead_code)]
 struct WidgetAttrs {
     ident: Ident,
 

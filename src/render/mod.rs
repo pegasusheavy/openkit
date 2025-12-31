@@ -10,9 +10,7 @@ pub use text::TextRenderer;
 
 use crate::geometry::{Color, Point, Rect, Size, BorderRadius};
 use crate::platform::Window;
-use crate::theme::ThemeData;
 
-use std::sync::Arc;
 
 #[cfg(feature = "gpu")]
 use wgpu;
@@ -139,6 +137,7 @@ impl Renderer {
 pub struct GpuRenderer {
     surface: wgpu::Surface<'static>,
     device: wgpu::Device,
+    #[allow(dead_code)]
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     size: Size,
@@ -218,7 +217,7 @@ impl GpuRenderer {
         }
     }
 
-    pub fn begin_frame(&mut self, background: Color) {
+    pub fn begin_frame(&mut self, _background: Color) {
         // TODO: Start render pass with background clear
     }
 
@@ -313,7 +312,7 @@ impl CpuRenderer {
         // Simple text rendering - in production would use cosmic-text for proper glyph rendering
         // For now, just draw a placeholder
         let [r, g, b, a] = color.to_rgba8();
-        let paint = tiny_skia::Paint {
+        let _paint = tiny_skia::Paint {
             shader: tiny_skia::Shader::SolidColor(tiny_skia::Color::from_rgba8(r, g, b, a)),
             anti_alias: true,
             ..Default::default()
@@ -330,7 +329,7 @@ impl CpuRenderer {
 
         // For MVP, we'll render text using cosmic-text's rasterization
         // This is a simplified placeholder
-        if let Some(rect) = rect {
+        if let Some(_rect) = rect {
             // In a full implementation, we'd rasterize glyphs here
             // For now, just indicate text area
         }

@@ -3,7 +3,7 @@
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
 use crate::css::{ClassList, WidgetState};
 use crate::event::{Event, EventResult};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size, EdgeInsets};
+use crate::geometry::{BorderRadius, Color, Rect, Size, EdgeInsets};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 

@@ -84,8 +84,8 @@ impl TextRenderer {
                 let physical_glyph = glyph.physical((0.0, 0.0), 1.0);
 
                 if let Some(image) = self.swash_cache.get_image(&mut font_system, physical_glyph.cache_key) {
-                    let glyph_x = physical_glyph.x as i32;
-                    let glyph_y = physical_glyph.y as i32 + run.line_y as i32;
+                    let glyph_x = physical_glyph.x;
+                    let glyph_y = physical_glyph.y + run.line_y as i32;
 
                     for (i, alpha) in image.data.iter().enumerate() {
                         let px = glyph_x + (i as i32 % image.placement.width as i32);

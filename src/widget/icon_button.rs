@@ -274,50 +274,47 @@ impl Widget for IconButton {
             return EventResult::Ignored;
         }
 
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
 
-                match mouse.kind {
-                    MouseEventKind::Move | MouseEventKind::Enter => {
-                        if in_bounds && !self.base.state.hovered {
-                            self.base.state.hovered = true;
-                            ctx.request_redraw();
-                        } else if !in_bounds && self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
+            match mouse.kind {
+                MouseEventKind::Move | MouseEventKind::Enter => {
+                    if in_bounds && !self.base.state.hovered {
+                        self.base.state.hovered = true;
+                        ctx.request_redraw();
+                    } else if !in_bounds && self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
                     }
-                    MouseEventKind::Leave => {
-                        if self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Down if in_bounds => {
-                        if mouse.button == Some(MouseButton::Left) {
-                            self.base.state.pressed = true;
-                            ctx.request_focus(self.base.id);
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    MouseEventKind::Up => {
-                        if self.base.state.pressed && mouse.button == Some(MouseButton::Left) {
-                            self.base.state.pressed = false;
-                            if in_bounds {
-                                if let Some(handler) = &self.on_click {
-                                    handler();
-                                }
-                            }
-                            ctx.request_redraw();
-                            return EventResult::Handled;
-                        }
-                    }
-                    _ => {}
                 }
+                MouseEventKind::Leave => {
+                    if self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Down if in_bounds => {
+                    if mouse.button == Some(MouseButton::Left) {
+                        self.base.state.pressed = true;
+                        ctx.request_focus(self.base.id);
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                MouseEventKind::Up => {
+                    if self.base.state.pressed && mouse.button == Some(MouseButton::Left) {
+                        self.base.state.pressed = false;
+                        if in_bounds {
+                            if let Some(handler) = &self.on_click {
+                                handler();
+                            }
+                        }
+                        ctx.request_redraw();
+                        return EventResult::Handled;
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

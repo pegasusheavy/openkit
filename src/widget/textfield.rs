@@ -1,13 +1,14 @@
 //! Text field widget.
 
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
-use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
-use crate::event::{Event, EventResult, MouseEvent, MouseEventKind, MouseButton, KeyEvent, KeyEventKind, Key};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::css::{ClassList, WidgetState};
+use crate::event::{Event, EventResult, MouseEventKind, MouseButton, KeyEventKind, Key};
+use crate::geometry::{BorderRadius, Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
 /// A single-line text input widget.
+#[allow(clippy::type_complexity)]
 pub struct TextField {
     base: WidgetBase,
     value: String,
@@ -144,7 +145,7 @@ impl Widget for TextField {
         self.base.state
     }
 
-    fn intrinsic_size(&self, ctx: &LayoutContext) -> Size {
+    fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
         // Default text field size
         Size::new(200.0, 36.0)
     }

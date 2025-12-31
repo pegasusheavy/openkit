@@ -93,6 +93,7 @@ impl MenuItem {
 ///     .item(MenuItem::new("delete", "Delete").icon("🗑️"))
 ///     .on_select(|id| println!("Selected: {}", id));
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct ContextMenu {
     base: WidgetBase,
     items: Vec<MenuItem>,
@@ -195,6 +196,7 @@ impl ContextMenu {
         }).sum()
     }
 
+    #[allow(dead_code)]
     fn get_item_rect(&self, index: usize) -> Rect {
         let mut y = self.position.y;
         for (i, item) in self.items.iter().enumerate() {
@@ -394,11 +396,9 @@ impl Widget for ContextMenu {
                                 }
                                 y += height;
                             }
-                        } else {
-                            if self.hovered_index.is_some() {
-                                self.hovered_index = None;
-                                ctx.request_redraw();
-                            }
+                        } else if self.hovered_index.is_some() {
+                            self.hovered_index = None;
+                            ctx.request_redraw();
                         }
                     }
                     MouseEventKind::Down if mouse.button == Some(MouseButton::Left) => {

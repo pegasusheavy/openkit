@@ -299,43 +299,40 @@ impl Widget for Avatar {
             return EventResult::Ignored;
         }
 
-        match event {
-            Event::Mouse(mouse) => {
-                let in_bounds = self.bounds().contains(mouse.position);
+        if let Event::Mouse(mouse) = event {
+            let in_bounds = self.bounds().contains(mouse.position);
 
-                match mouse.kind {
-                    MouseEventKind::Move | MouseEventKind::Enter => {
-                        if in_bounds && !self.base.state.hovered {
-                            self.base.state.hovered = true;
-                            ctx.request_redraw();
-                        } else if !in_bounds && self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Leave => {
-                        if self.base.state.hovered {
-                            self.base.state.hovered = false;
-                            ctx.request_redraw();
-                        }
-                    }
-                    MouseEventKind::Up if in_bounds && self.base.state.pressed => {
-                        self.base.state.pressed = false;
-                        if let Some(handler) = &self.on_click {
-                            handler();
-                        }
+            match mouse.kind {
+                MouseEventKind::Move | MouseEventKind::Enter => {
+                    if in_bounds && !self.base.state.hovered {
+                        self.base.state.hovered = true;
                         ctx.request_redraw();
-                        return EventResult::Handled;
-                    }
-                    MouseEventKind::Down if in_bounds => {
-                        self.base.state.pressed = true;
+                    } else if !in_bounds && self.base.state.hovered {
+                        self.base.state.hovered = false;
                         ctx.request_redraw();
-                        return EventResult::Handled;
                     }
-                    _ => {}
                 }
+                MouseEventKind::Leave => {
+                    if self.base.state.hovered {
+                        self.base.state.hovered = false;
+                        ctx.request_redraw();
+                    }
+                }
+                MouseEventKind::Up if in_bounds && self.base.state.pressed => {
+                    self.base.state.pressed = false;
+                    if let Some(handler) = &self.on_click {
+                        handler();
+                    }
+                    ctx.request_redraw();
+                    return EventResult::Handled;
+                }
+                MouseEventKind::Down if in_bounds => {
+                    self.base.state.pressed = true;
+                    ctx.request_redraw();
+                    return EventResult::Handled;
+                }
+                _ => {}
             }
-            _ => {}
         }
         EventResult::Ignored
     }

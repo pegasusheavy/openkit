@@ -3,7 +3,7 @@
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
 use crate::css::{ClassList, WidgetState};
 use crate::event::{Event, EventResult, MouseEventKind, Key, KeyEventKind};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::geometry::{BorderRadius, Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -62,6 +62,7 @@ impl DropdownOption {
 ///         println!("Selected: {}", value);
 ///     });
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct Dropdown {
     base: WidgetBase,
     options: Vec<DropdownOption>,

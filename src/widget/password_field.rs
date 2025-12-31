@@ -1,9 +1,9 @@
 //! Password field widget with masked input.
 
 use super::{Widget, WidgetBase, WidgetId, LayoutContext, PaintContext, EventContext};
-use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
-use crate::event::{Event, EventResult, MouseEvent, MouseEventKind, MouseButton, KeyEvent, KeyEventKind, Key};
-use crate::geometry::{BorderRadius, Color, Point, Rect, Size};
+use crate::css::{ClassList, WidgetState};
+use crate::event::{Event, EventResult, MouseEventKind, KeyEventKind, Key};
+use crate::geometry::{BorderRadius, Point, Rect, Size};
 use crate::layout::{Constraints, LayoutResult};
 use crate::render::Painter;
 
@@ -23,6 +23,7 @@ use crate::render::Painter;
 ///         println!("Password submitted");
 ///     });
 /// ```
+#[allow(clippy::type_complexity)]
 pub struct PasswordField {
     base: WidgetBase,
     value: String,
@@ -270,7 +271,7 @@ impl Widget for PasswordField {
         let text_y = rect.y() + (rect.height() + font_size * 0.8) / 2.0;
 
         let toggle_width = if self.show_toggle { 32.0 } else { 0.0 };
-        let text_area_width = rect.width() - padding * 2.0 - toggle_width;
+        let _text_area_width = rect.width() - padding * 2.0 - toggle_width;
 
         if self.value.is_empty() {
             // Draw placeholder
@@ -376,12 +377,11 @@ impl Widget for PasswordField {
                 }
             }
             Event::Key(key) if self.base.state.focused => {
-                if key.kind == KeyEventKind::Down {
-                    if self.handle_key_input(&key.key, key.text.as_deref()) {
+                if key.kind == KeyEventKind::Down
+                    && self.handle_key_input(&key.key, key.text.as_deref()) {
                         ctx.request_redraw();
                         return EventResult::Handled;
                     }
-                }
             }
             _ => {}
         }
