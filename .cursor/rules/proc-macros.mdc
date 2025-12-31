@@ -1,0 +1,197 @@
+---
+description: Procedural macro development patterns
+globs: ["openkit-macros/**/*.rs"]
+---
+
+# Procedural Macros (openkit-macros)
+
+The `openkit-macros` crate provides derive and attribute macros for OpenKit.
+
+## Crate Structure
+
+```
+openkit-macros/
+├── Cargo.toml
+└── src/
+    ├── lib.rs       # Macro entry points
+    ├── widget.rs    # Widget derive implementation
+    ├── component.rs # Component derive implementation
+    └── styleable.rs # Styleable derive implementation
+```
+
+## Dependencies
+
+- `proc-macro2` - TokenStream manipulation
+- `quote` - Code generation
+- `syn` - Parsing Rust code (v2.0)
+- `darling` - Attribute parsing
+- `proc-macro-error` - Better error messages
+
+## Available Macros
+
+### `#[derive(Widget)]`
+
+Generates Widget trait boilerplate:
+
+```rust
+#[derive(Widget)]
+#[widget(type_name = "my-widget")]
+struct MyWidget {
+    #[base]
+    base: WidgetBase,
+    label: String,
+}
+```
+
+Generated:
+- `widget_id()`, `widget_type_name()`, `widget_element_id()`
+- `widget_classes()`, `widget_state()`
+- `widget_bounds()`, `set_widget_bounds()`
+
+### `#[derive(Component)]`
+
+Generates Angular-like component infrastructure:
+
+```rust
+#[derive(Component)]
+#[component(selector = "counter")]
+struct Counter {
+    #[state]
+    count: i32,
+    
+    #[prop]
+    step: i32,
+    
+    #[event]
+    on_change: EventEmitter<i32>,
+}
+```
+
+Generated:
+- `CounterState` struct with `State<T>` wrappers
+- `CounterProps` struct
+- `CounterEvents` struct
+- `new()` constructor
+- `selector()` method
+
+### `#[derive(Styleable)]`
+
+Generates CSS styling methods:
+
+```rust
+#[derive(Styleable)]
+struct MyWidget {
+    #[base]
+    base: WidgetBase,
+}
+```
+
+Generated:
+- `class(&str) -> Self`
+- `classes(&[&str]) -> Self`
+- `id(&str) -> Self`
+- `remove_class()`, `toggle_class()`, `has_class()`
+
+## Implementation Patterns
+
+### Derive Macro Structure
+
+```rust
+#[proc_macro_derive(MacroName, attributes(attr1, attr2))]
+#[proc_macro_error]
+pub fn derive_macro(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    impl_macro(input)
+        .unwrap_or_else(|e| e.to_compile_error())
+        .into()
+}
+
+fn impl_macro(input: DeriveInput) -> Result<TokenStream, Error> {
+    let name = &input.ident;
+    
+    // Parse attributes and fields
+    // Generate code with quote!
+    
+    let expanded = quote! {
+        impl #name {
+            // generated code
+        }
+    };
+    
+    Ok(expanded)
+}
+```
+
+### Attribute Parsing with darling
+
+```rust
+use darling::FromDeriveInput;
+
+#[derive(FromDeriveInput)]
+#[darling(attributes(widget))]
+struct WidgetAttrs {
+    ident: Ident,
+    #[darling(default)]
+    type_name: Option<String>,
+}
+```
+
+### Field Iteration
+
+```rust
+let fields = match &input.data {
+    Data::Struct(data) => &data.fields,
+    _ => return Err(Error::new_spanned(input, "Expected struct")),
+};
+
+let named = match fields {
+    Fields::Named(named) => named,
+    _ => return Err(Error::new_spanned(input, "Expected named fields")),
+};
+
+for field in &named.named {
+    let ident = field.ident.as_ref().unwrap();
+    let ty = &field.ty;
+    
+    // Check for attributes
+    let has_attr = field.attrs.iter().any(|a| a.path().is_ident("my_attr"));
+}
+```
+
+### Code Generation with quote!
+
+```rust
+use quote::{quote, format_ident};
+
+let method_name = format_ident!("get_{}", field_name);
+
+let expanded = quote! {
+    impl #struct_name {
+        pub fn #method_name(&self) -> &#field_type {
+            &self.#field_name
+        }
+    }
+};
+```
+
+## Testing Proc Macros
+
+Use `trybuild` for compile-fail tests:
+
+```rust
+#[test]
+fn ui() {
+    let t = trybuild::TestCases::new();
+    t.pass("tests/pass/*.rs");
+    t.compile_fail("tests/fail/*.rs");
+}
+```
+
+## Best Practices
+
+1. Use `#[proc_macro_error]` for better error messages
+2. Return `syn::Error` for compile errors
+3. Use `darling` for attribute parsing
+4. Generate doc comments on generated code
+5. Test with `trybuild` for compile-fail cases
+6. Keep macro implementations in separate modules
