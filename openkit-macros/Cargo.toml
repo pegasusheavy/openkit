@@ -5,8 +5,12 @@ edition = "2021"
 description = "Procedural macros for the OpenKit UI framework"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/pegasusheavy/openkit"
+homepage = "https://github.com/pegasusheavy/openkit"
+documentation = "https://docs.rs/openkit-macros"
+authors = ["Pegasus Heavy Industries"]
 keywords = ["gui", "ui", "macros", "proc-macro"]
 categories = ["gui", "development-tools::procedural-macro-helpers"]
+rust-version = "1.75"
 
 [lib]
 proc-macro = true
