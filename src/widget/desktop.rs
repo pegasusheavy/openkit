@@ -425,7 +425,7 @@ impl Desktop {
                 // TODO: Implement actual image loading and rendering
                 // For now, draw the fallback color
                 painter.fill_rect(rect, *fallback);
-                
+
                 // Placeholder: draw a pattern to indicate image area
                 self.draw_image_placeholder(painter, rect);
             }
@@ -436,7 +436,7 @@ impl Desktop {
                 // TODO: Implement actual image loading
                 painter.fill_rect(rect, *fallback);
                 self.draw_image_placeholder(painter, rect);
-                
+
                 // Draw overlay
                 painter.fill_rect(rect, *overlay);
             }
@@ -448,13 +448,13 @@ impl Desktop {
         // Draw a subtle grid pattern to indicate where image would be
         let grid_size: f32 = 40.0;
         let line_color = Color::WHITE.with_alpha(0.03);
-        
+
         let mut x = rect.x();
         while x < rect.x() + rect.width() {
             painter.fill_rect(Rect::new(x, rect.y(), 1.0, rect.height()), line_color);
             x += grid_size;
         }
-        
+
         let mut y = rect.y();
         while y < rect.y() + rect.height() {
             painter.fill_rect(Rect::new(rect.x(), y, rect.width(), 1.0), line_color);
@@ -466,7 +466,7 @@ impl Desktop {
     fn paint_gradient(&self, painter: &mut Painter, rect: Rect, start: Color, end: Color, direction: GradientDirection) {
         // Simulate gradient with multiple color bands
         let steps = 64;
-        
+
         match direction {
             GradientDirection::ToBottom | GradientDirection::ToTop => {
                 let (from, to) = if direction == GradientDirection::ToBottom {
@@ -475,7 +475,7 @@ impl Desktop {
                     (end, start)
                 };
                 let step_height = rect.height() / steps as f32;
-                
+
                 for i in 0..steps {
                     let t = i as f32 / (steps - 1) as f32;
                     let color = Self::lerp_color(from, to, t);
@@ -490,7 +490,7 @@ impl Desktop {
                     (end, start)
                 };
                 let step_width = rect.width() / steps as f32;
-                
+
                 for i in 0..steps {
                     let t = i as f32 / (steps - 1) as f32;
                     let color = Self::lerp_color(from, to, t);
@@ -542,13 +542,13 @@ impl Desktop {
                 let center_x = rect.x() + rect.width() / 2.0;
                 let center_y = rect.y() + rect.height() / 2.0;
                 let max_radius = (rect.width().powi(2) + rect.height().powi(2)).sqrt() / 2.0;
-                
+
                 // Draw from outside in so inner colors overwrite outer
                 for i in (0..steps).rev() {
                     let t = i as f32 / (steps - 1) as f32;
                     let color = Self::lerp_color(start, end, t);
                     let radius = max_radius * t;
-                    
+
                     // Approximate circle with filled rect (simplified)
                     let size = radius * 2.0;
                     painter.fill_rect(
