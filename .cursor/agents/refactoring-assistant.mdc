@@ -29,7 +29,7 @@ You are a specialized agent for refactoring code in the OpenKit project.
 // Before: Long method
 fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
     let theme = ctx.style_ctx.theme;
-    
+
     // Draw background
     let bg_color = if self.base.state.disabled {
         theme.colors.primary.with_alpha(0.5)
@@ -41,24 +41,24 @@ fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
         theme.colors.primary
     };
     painter.fill_rounded_rect(rect, bg_color, radius);
-    
+
     // ... more code
 }
 
 // After: Extracted method
 fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
     let theme = ctx.style_ctx.theme;
-    
+
     // Draw background
     let bg_color = self.background_color(theme);
     painter.fill_rounded_rect(rect, bg_color, radius);
-    
+
     // ... more code
 }
 
 fn background_color(&self, theme: &ThemeData) -> Color {
     let base = theme.colors.primary;
-    
+
     if self.base.state.disabled {
         base.with_alpha(0.5)
     } else if self.base.state.pressed {
@@ -80,7 +80,7 @@ impl Button {
         self.base.classes.add(class);
         self
     }
-    
+
     pub fn id(mut self, id: &str) -> Self {
         self.base.element_id = Some(id.to_string());
         self
@@ -92,7 +92,7 @@ impl Label {
         self.base.classes.add(class);
         self
     }
-    
+
     pub fn id(mut self, id: &str) -> Self {
         self.base.element_id = Some(id.to_string());
         self
@@ -102,12 +102,12 @@ impl Label {
 // After: Trait with default implementation
 pub trait Styleable: Sized {
     fn base_mut(&mut self) -> &mut WidgetBase;
-    
+
     fn class(mut self, class: &str) -> Self {
         self.base_mut().classes.add(class);
         self
     }
-    
+
     fn id(mut self, id: &str) -> Self {
         self.base_mut().element_id = Some(id.to_string());
         self
@@ -143,7 +143,7 @@ const LINE_HEIGHT: f32 = 1.5;
 fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
     let text_width = self.label.len() as f32 * FONT_SIZE * CHAR_WIDTH_RATIO;
     let text_height = FONT_SIZE * LINE_HEIGHT;
-    
+
     Size::new(
         text_width + HORIZONTAL_PADDING * 2.0,
         text_height + VERTICAL_PADDING * 2.0,
@@ -170,11 +170,11 @@ fn handle_click(&mut self) {
     if self.base.state.disabled {
         return;
     }
-    
+
     if !self.base.state.pressed {
         return;
     }
-    
+
     if let Some(handler) = &self.on_click {
         handler();
     }

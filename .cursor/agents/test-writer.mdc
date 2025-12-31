@@ -28,10 +28,10 @@ mod tests {
     fn test_function_name() {
         // Arrange
         let input = create_test_input();
-        
+
         // Act
         let result = function_under_test(input);
-        
+
         // Assert
         assert_eq!(result, expected_value);
     }
@@ -98,7 +98,7 @@ mod tests {
         let button = Button::new("Test")
             .class("primary")
             .id("my-button");
-        
+
         assert!(button.classes().contains("primary"));
         assert_eq!(button.element_id(), Some("my-button"));
     }
@@ -107,14 +107,14 @@ mod tests {
     fn test_widget_state_changes() {
         let mut button = Button::new("Test");
         let mut ctx = EventContext::new();
-        
+
         // Simulate hover
         let event = Event::Mouse(MouseEvent::new(
             MouseEventKind::Enter,
             Point::new(10.0, 10.0),
         ));
         button.handle_event(&event, &mut ctx);
-        
+
         assert!(button.state().hovered);
     }
 }
@@ -135,14 +135,14 @@ fn test_column_layout() {
         .gap(8.0)
         .child(Label::new("One"))
         .child(Label::new("Two"));
-    
+
     let constraints = Constraints::loose(Size::new(200.0, 400.0));
     let theme = ThemeData::light();
     let style_ctx = StyleContext::new(&theme);
     let layout_ctx = LayoutContext::new(&style_ctx);
-    
+
     let result = col.layout(constraints, &layout_ctx);
-    
+
     assert!(result.size.height > 0.0);
 }
 ```

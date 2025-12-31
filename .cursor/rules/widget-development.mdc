@@ -49,7 +49,7 @@ fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult
     match event {
         Event::Mouse(mouse) => {
             let in_bounds = self.bounds().contains(mouse.position);
-            
+
             match mouse.kind {
                 MouseEventKind::Enter | MouseEventKind::Move => {
                     if in_bounds && !self.base.state.hovered {
@@ -78,20 +78,20 @@ fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult
 ```rust
 fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
     let theme = ctx.style_ctx.theme;
-    
+
     // 1. Draw background
     let bg_color = self.background_color(theme);
     let radius = BorderRadius::all(theme.radii.md);
     painter.fill_rounded_rect(rect, bg_color, radius);
-    
+
     // 2. Draw border (if applicable)
     if self.has_border() {
         painter.stroke_rect(rect, theme.colors.border, 1.0);
     }
-    
+
     // 3. Draw content (text, icons, etc.)
     painter.draw_text(&self.label, position, text_color, font_size);
-    
+
     // 4. Draw focus ring (if focused)
     if self.base.state.focused && ctx.focus_visible {
         painter.stroke_rect(focus_rect, theme.colors.ring, 2.0);
@@ -109,7 +109,7 @@ impl MyWidget {
         self.base.classes.add(class);
         self
     }
-    
+
     pub fn id(mut self, id: &str) -> Self {
         self.base.element_id = Some(id.to_string());
         self
@@ -132,7 +132,7 @@ impl Widget for Container {
     fn children(&self) -> &[Box<dyn Widget>] {
         &self.children
     }
-    
+
     fn children_mut(&mut self) -> &mut [Box<dyn Widget>] {
         &mut self.children
     }

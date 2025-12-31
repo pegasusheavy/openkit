@@ -124,7 +124,7 @@ fn test_css_cascade() {
         .base { color: red; }
         .override { color: blue; }
     "#;
-    
+
     let sheet = CssParser::parse_stylesheet(css).unwrap();
     // assertions...
 }

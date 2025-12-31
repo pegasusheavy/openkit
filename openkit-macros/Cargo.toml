@@ -1,0 +1,24 @@
+[package]
+name = "openkit-macros"
+version = "0.1.0"
+edition = "2021"
+description = "Procedural macros for the OpenKit UI framework"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/pegasusheavy/openkit"
+keywords = ["gui", "ui", "macros", "proc-macro"]
+categories = ["gui", "development-tools::procedural-macro-helpers"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# Parsing and quoting
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full", "extra-traits", "parsing"] }
+
+# For better error messages
+proc-macro-error = "1"
+
+# For parsing attributes
+darling = "0.20"

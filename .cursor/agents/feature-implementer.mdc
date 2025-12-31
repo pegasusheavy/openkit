@@ -38,19 +38,19 @@ pub struct NewWidget {
 impl NewWidget {
     /// Create a new widget.
     pub fn new() -> Self { ... }
-    
+
     /// Configure option A.
     pub fn option_a(mut self, value: Type) -> Self {
         self.config.option_a = value;
         self
     }
-    
+
     /// Add a CSS class.
     pub fn class(mut self, class: &str) -> Self {
         self.base.classes.add(class);
         self
     }
-    
+
     /// Set event handler.
     pub fn on_event<F>(mut self, handler: F) -> Self
     where
@@ -69,19 +69,19 @@ impl Widget for NewWidget {
     // Required implementations
     fn id(&self) -> WidgetId { self.base.id }
     fn type_name(&self) -> &'static str { "new-widget" }
-    
+
     fn layout(&mut self, constraints: Constraints, ctx: &LayoutContext) -> LayoutResult {
         // Layout logic
     }
-    
+
     fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
         // Rendering logic
     }
-    
+
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
         // Event handling
     }
-    
+
     // ... other required methods
 }
 ```
@@ -154,7 +154,7 @@ mod tests {
         let widget = NewWidget::new()
             .option_a(Value)
             .class("custom");
-        
+
         assert!(widget.classes().contains("custom"));
     }
 

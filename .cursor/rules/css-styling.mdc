@@ -49,17 +49,17 @@ The theme provides CSS variables (design tokens):
   --destructive: #ef4444;
   --border: #e2e8f0;
   --ring: #3b82f6;
-  
+
   /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-4: 1rem;
-  
+
   /* Typography */
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
-  
+
   /* Radii */
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;

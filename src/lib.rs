@@ -63,6 +63,10 @@ pub mod render;
 pub mod theme;
 pub mod widget;
 
+// Re-export proc macros when the feature is enabled
+#[cfg(feature = "macros")]
+pub use openkit_macros::{Widget, Component, Styleable, component, prop, state, event};
+
 pub mod prelude {
     //! Convenient re-exports for common types.
 
@@ -96,7 +100,7 @@ pub mod prelude {
         Pipe, UppercasePipe, LowercasePipe, CurrencyPipe,
     };
 
-    // Re-export all macros
+    // Re-export all declarative macros
     pub use crate::{
         // Widget macros
         view, col, row, class, style,
@@ -106,6 +110,10 @@ pub mod prelude {
         define_component, ng_if, ng_for, ng_switch,
         bind, on, model,
     };
+    
+    // Re-export proc macros when enabled
+    #[cfg(feature = "macros")]
+    pub use openkit_macros::{Widget, Component, Styleable, component, prop, state, event};
 }
 
 /// Re-export of the error types

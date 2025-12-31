@@ -96,15 +96,15 @@ impl Lifecycle for MyComponent {
     fn on_init(&mut self, ctx: &mut ComponentContext) {
         // Called when component initializes
     }
-    
+
     fn on_changes(&mut self, changes: &Changes) {
         // Called when props change
     }
-    
+
     fn on_render(&mut self, ctx: &mut ComponentContext) {
         // Called after each render
     }
-    
+
     fn on_destroy(&mut self) {
         // Called when component is removed
     }
