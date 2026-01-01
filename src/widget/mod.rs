@@ -29,6 +29,28 @@ pub mod tooltip;
 pub mod window;
 pub mod workspace;
 
+// Desktop shell widgets
+pub mod action_center;
+pub mod app_grid;
+pub mod battery_indicator;
+pub mod calendar;
+pub mod glass_pane;
+pub mod network_indicator;
+pub mod panel;
+pub mod search_bar;
+pub mod start_menu;
+pub mod taskbar_button;
+pub mod volume_control;
+
+// Browser chrome widgets
+pub mod address_bar;
+pub mod bookmark_bar;
+pub mod browser_tab;
+pub mod browser_toolbar;
+pub mod download_item;
+pub mod find_bar;
+pub mod navigation_bar;
+
 use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
 use crate::event::{Event, EventResult};
 use crate::geometry::{Point, Rect, Size};

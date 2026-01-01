@@ -170,7 +170,7 @@ impl App {
         F: FnOnce() -> W + 'static,
         W: Widget + 'static,
     {
-        env_logger::init();
+        let _ = env_logger::try_init();
 
         let platform = Platform::new().map_err(AppError::Platform)?;
 

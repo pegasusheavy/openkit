@@ -9,7 +9,7 @@ pub struct ThemeColors {
     pub background: Color,
     pub foreground: Color,
 
-    // Card
+    // Card/Surface
     pub card: Color,
     pub card_foreground: Color,
 
@@ -41,20 +41,41 @@ pub struct ThemeColors {
     pub border: Color,
     pub input: Color,
     pub ring: Color,
+
+    // Additional semantic colors for UI components
+    /// Success color (e.g., secure connection, completed actions)
+    pub success: Color,
+    /// Warning color (e.g., mixed content, pending states)
+    pub warning: Color,
+
+    // Semantic aliases for browser chrome and shell components
+    /// Surface color (slightly elevated background)
+    pub surface: Color,
+    /// Surface hover state
+    pub surface_hover: Color,
+    /// Primary text color
+    pub text_primary: Color,
+    /// Secondary text color
+    pub text_secondary: Color,
 }
 
 impl ThemeColors {
     /// Light theme colors (inspired by shadcn/ui).
     pub fn light() -> Self {
+        let foreground = Color::from_hsl(222.2, 84.0, 4.9);
+        let muted = Color::from_hsl(210.0, 40.0, 96.0);
+        let muted_foreground = Color::from_hsl(215.4, 16.3, 46.9);
+        let card = Color::from_hsl(0.0, 0.0, 100.0);
+
         Self {
             background: Color::from_hsl(0.0, 0.0, 100.0),
-            foreground: Color::from_hsl(222.2, 84.0, 4.9),
+            foreground,
 
-            card: Color::from_hsl(0.0, 0.0, 100.0),
-            card_foreground: Color::from_hsl(222.2, 84.0, 4.9),
+            card,
+            card_foreground: foreground,
 
             popover: Color::from_hsl(0.0, 0.0, 100.0),
-            popover_foreground: Color::from_hsl(222.2, 84.0, 4.9),
+            popover_foreground: foreground,
 
             primary: Color::from_hsl(221.2, 83.2, 53.3),
             primary_foreground: Color::from_hsl(210.0, 40.0, 98.0),
@@ -62,8 +83,8 @@ impl ThemeColors {
             secondary: Color::from_hsl(210.0, 40.0, 96.0),
             secondary_foreground: Color::from_hsl(222.2, 47.4, 11.2),
 
-            muted: Color::from_hsl(210.0, 40.0, 96.0),
-            muted_foreground: Color::from_hsl(215.4, 16.3, 46.9),
+            muted,
+            muted_foreground,
 
             accent: Color::from_hsl(210.0, 40.0, 96.0),
             accent_foreground: Color::from_hsl(222.2, 47.4, 11.2),
@@ -74,39 +95,65 @@ impl ThemeColors {
             border: Color::from_hsl(214.3, 31.8, 91.4),
             input: Color::from_hsl(214.3, 31.8, 91.4),
             ring: Color::from_hsl(221.2, 83.2, 53.3),
+
+            // Additional semantic colors
+            success: Color::from_hsl(142.1, 76.2, 36.3), // Green
+            warning: Color::from_hsl(38.0, 92.0, 50.0),  // Orange/amber
+
+            // Semantic aliases
+            surface: card,
+            surface_hover: muted,
+            text_primary: foreground,
+            text_secondary: muted_foreground,
         }
     }
 
     /// Dark theme colors (inspired by shadcn/ui).
     pub fn dark() -> Self {
+        let foreground = Color::from_hsl(210.0, 40.0, 98.0);
+        let muted = Color::from_hsl(217.2, 32.6, 17.5);
+        let muted_foreground = Color::from_hsl(215.0, 20.2, 65.1);
+        let card = Color::from_hsl(222.2, 84.0, 4.9);
+        let surface_hover = Color::from_hsl(217.2, 32.6, 22.0);
+
         Self {
             background: Color::from_hsl(222.2, 84.0, 4.9),
-            foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            foreground,
 
-            card: Color::from_hsl(222.2, 84.0, 4.9),
-            card_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            card,
+            card_foreground: foreground,
 
-            popover: Color::from_hsl(222.2, 84.0, 4.9),
-            popover_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            popover: card,
+            popover_foreground: foreground,
 
             primary: Color::from_hsl(217.2, 91.2, 59.8),
             primary_foreground: Color::from_hsl(222.2, 47.4, 11.2),
 
-            secondary: Color::from_hsl(217.2, 32.6, 17.5),
-            secondary_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            secondary: muted,
+            secondary_foreground: foreground,
 
-            muted: Color::from_hsl(217.2, 32.6, 17.5),
-            muted_foreground: Color::from_hsl(215.0, 20.2, 65.1),
+            muted,
+            muted_foreground,
 
-            accent: Color::from_hsl(217.2, 32.6, 17.5),
-            accent_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            accent: muted,
+            accent_foreground: foreground,
 
             destructive: Color::from_hsl(0.0, 62.8, 30.6),
-            destructive_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+            destructive_foreground: foreground,
 
-            border: Color::from_hsl(217.2, 32.6, 17.5),
-            input: Color::from_hsl(217.2, 32.6, 17.5),
+            border: muted,
+            input: muted,
             ring: Color::from_hsl(224.3, 76.3, 48.0),
+
+            // Additional semantic colors
+            success: Color::from_hsl(142.1, 70.6, 45.3), // Green
+            warning: Color::from_hsl(38.0, 92.0, 50.0),  // Orange/amber
+
+            // Semantic aliases
+            surface: card,
+            surface_hover,
+            text_primary: foreground,
+            text_secondary: muted_foreground,
         }
     }
 }

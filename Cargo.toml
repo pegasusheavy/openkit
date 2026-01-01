@@ -17,9 +17,15 @@ categories = ["gui", "rendering"]
 rust-version = "1.85"
 
 [features]
-default = ["gpu", "macros"]
+default = ["gpu", "macros", "x11", "wayland"]
 gpu = ["wgpu"]
 macros = ["openkit-macros"]
+# Platform backends (Linux)
+wayland = ["winit/wayland", "winit/wayland-csd-adwaita"]
+x11 = ["winit/x11"]
+# High-performance GPU features
+gpu-profiling = ["gpu"]
+hdr = ["gpu"]
 
 [dependencies]
 # Proc macros (optional, enabled by default)
@@ -29,6 +35,9 @@ winit = "0.30"
 
 # GPU Rendering (optional, enabled by default)
 wgpu = { version = "23", optional = true }
+
+# Vertex buffer data casting (required for GPU)
+bytemuck = { version = "1", features = ["derive"] }
 
 # CPU Rendering fallback
 tiny-skia = "0.11"
@@ -69,6 +78,37 @@ unicode-segmentation = "1"
 
 [dev-dependencies]
 pretty_assertions = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Benchmarks
+[[bench]]
+name = "css_parsing"
+harness = false
+
+[[bench]]
+name = "layout"
+harness = false
+
+[[bench]]
+name = "rendering"
+harness = false
+
+[[bench]]
+name = "text"
+harness = false
+
+[[bench]]
+name = "widget_tree"
+harness = false
+
+[profile.bench]
+lto = true
+codegen-units = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
 
 [[example]]
 name = "hello_world"

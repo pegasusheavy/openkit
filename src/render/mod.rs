@@ -1,19 +1,37 @@
 //! Rendering engine for OpenKit.
 //!
 //! Provides GPU-accelerated rendering using wgpu with a CPU fallback using tiny-skia.
+//!
+//! # GPU Acceleration
+//!
+//! The GPU renderer provides:
+//! - Batched draw calls for minimal GPU overhead
+//! - Custom WGSL shaders for primitives (rectangles, rounded rectangles, gradients)
+//! - Texture atlas for efficient text and image rendering
+//! - GPU-accelerated effects (blur, shadow, glow)
+//! - Multi-sample anti-aliasing (MSAA)
+//! - HDR support (when available)
+//!
+//! # Performance Tips
+//!
+//! - Draw calls are automatically batched - draw similar elements together
+//! - Use the texture atlas for frequently-used images
+//! - Minimize effect usage (blur, shadow) as they require extra passes
 
 mod painter;
 mod text;
 
+#[cfg(feature = "gpu")]
+pub mod gpu;
+
 pub use painter::{Painter, DrawCommand};
 pub use text::TextRenderer;
 
+#[cfg(feature = "gpu")]
+pub use gpu::{GpuRenderer, GpuConfig, GpuError, RenderStats, PowerPreference};
+
 use crate::geometry::{Color, Point, Rect, Size, BorderRadius};
 use crate::platform::Window;
-
-
-#[cfg(feature = "gpu")]
-use wgpu;
 
 /// The main renderer.
 pub struct Renderer {
@@ -27,10 +45,22 @@ impl Renderer {
     /// Create a new renderer for a window.
     pub fn new(window: &Window) -> Self {
         #[cfg(feature = "gpu")]
-        let gpu = GpuRenderer::new(window).ok();
+        let gpu = GpuRenderer::new(window, GpuConfig::default()).ok();
 
         Self {
             #[cfg(feature = "gpu")]
+            gpu,
+            cpu: CpuRenderer::new(),
+            text: TextRenderer::new(),
+        }
+    }
+
+    /// Create a new renderer with custom GPU configuration.
+    #[cfg(feature = "gpu")]
+    pub fn with_config(window: &Window, config: GpuConfig) -> Self {
+        let gpu = GpuRenderer::new(window, config).ok();
+
+        Self {
             gpu,
             cpu: CpuRenderer::new(),
             text: TextRenderer::new(),
@@ -50,7 +80,7 @@ impl Renderer {
     pub fn begin_frame(&mut self, background: Color) {
         #[cfg(feature = "gpu")]
         if let Some(gpu) = &mut self.gpu {
-            gpu.begin_frame(background);
+            let _ = gpu.begin_frame(background);
             return;
         }
         self.cpu.begin_frame(background);
@@ -60,7 +90,7 @@ impl Renderer {
     pub fn end_frame(&mut self) {
         #[cfg(feature = "gpu")]
         if let Some(gpu) = &mut self.gpu {
-            gpu.end_frame();
+            let _ = gpu.end_frame();
             return;
         }
         self.cpu.end_frame();
@@ -88,8 +118,18 @@ impl Renderer {
                     // TODO: Image rendering
                     self.draw_rect(*rect, Color::from_rgb8(200, 200, 200), BorderRadius::ZERO);
                 }
+                DrawCommand::StrokeRoundedRect { rect, color, radius, width } => {
+                    self.stroke_rounded_rect(*rect, *color, *radius, *width);
+                }
             }
         }
+    }
+
+    /// Draw a stroked rounded rectangle.
+    pub fn stroke_rounded_rect(&mut self, rect: Rect, color: Color, _radius: BorderRadius, width: f32) {
+        // For now, use stroke_rect as fallback
+        // TODO: Implement proper rounded rect stroking in CPU/GPU backends
+        self.stroke_rect(rect, color, width);
     }
 
     /// Draw a filled rectangle.
@@ -121,6 +161,19 @@ impl Renderer {
         self.cpu.draw_line(from, to, color, width);
     }
 
+    /// Draw a stroked rectangle.
+    pub fn stroke_rect(&mut self, rect: Rect, color: Color, width: f32) {
+        // Draw four lines for the stroke
+        let x = rect.x();
+        let y = rect.y();
+        let max_x = rect.max_x();
+        let max_y = rect.max_y();
+        self.draw_line(Point::new(x, y), Point::new(max_x, y), color, width);
+        self.draw_line(Point::new(max_x, y), Point::new(max_x, max_y), color, width);
+        self.draw_line(Point::new(max_x, max_y), Point::new(x, max_y), color, width);
+        self.draw_line(Point::new(x, max_y), Point::new(x, y), color, width);
+    }
+
     /// Measure text size.
     pub fn measure_text(&self, text: &str, size: f32) -> Size {
         self.text.measure(text, size)
@@ -129,100 +182,6 @@ impl Renderer {
     /// Get the pixel buffer for software rendering (for presenting to window).
     pub fn pixels(&self) -> Option<&[u8]> {
         Some(self.cpu.pixels())
-    }
-}
-
-/// GPU renderer using wgpu.
-#[cfg(feature = "gpu")]
-pub struct GpuRenderer {
-    surface: wgpu::Surface<'static>,
-    device: wgpu::Device,
-    #[allow(dead_code)]
-    queue: wgpu::Queue,
-    config: wgpu::SurfaceConfiguration,
-    size: Size,
-}
-
-#[cfg(feature = "gpu")]
-impl GpuRenderer {
-    pub fn new(window: &Window) -> Result<Self, RenderError> {
-        let size = window.size();
-
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::all(),
-            ..Default::default()
-        });
-
-        // Create surface
-        let surface = instance
-            .create_surface(window.inner_arc())
-            .map_err(|e| RenderError::SurfaceCreation(e.to_string()))?;
-
-        // Get adapter
-        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            compatible_surface: Some(&surface),
-            force_fallback_adapter: false,
-        }))
-        .ok_or(RenderError::NoAdapter)?;
-
-        // Get device and queue
-        let (device, queue) = pollster::block_on(adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                label: Some("OpenKit Device"),
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                memory_hints: wgpu::MemoryHints::default(),
-            },
-            None,
-        ))
-        .map_err(|e| RenderError::DeviceCreation(e.to_string()))?;
-
-        // Configure surface
-        let surface_caps = surface.get_capabilities(&adapter);
-        let surface_format = surface_caps
-            .formats
-            .iter()
-            .copied()
-            .find(|f| f.is_srgb())
-            .unwrap_or(surface_caps.formats[0]);
-
-        let config = wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
-            width: size.width as u32,
-            height: size.height as u32,
-            present_mode: wgpu::PresentMode::Fifo,
-            alpha_mode: surface_caps.alpha_modes[0],
-            view_formats: vec![],
-            desired_maximum_frame_latency: 2,
-        };
-        surface.configure(&device, &config);
-
-        Ok(Self {
-            surface,
-            device,
-            queue,
-            config,
-            size,
-        })
-    }
-
-    pub fn resize(&mut self, size: Size) {
-        if size.width > 0.0 && size.height > 0.0 {
-            self.size = size;
-            self.config.width = size.width as u32;
-            self.config.height = size.height as u32;
-            self.surface.configure(&self.device, &self.config);
-        }
-    }
-
-    pub fn begin_frame(&mut self, _background: Color) {
-        // TODO: Start render pass with background clear
-    }
-
-    pub fn end_frame(&mut self) {
-        // TODO: Submit and present
     }
 }
 

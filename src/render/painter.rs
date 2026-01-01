@@ -70,6 +70,12 @@ impl Painter {
         );
     }
 
+    /// Draw a stroked rounded rectangle.
+    pub fn stroke_rounded_rect(&mut self, rect: Rect, color: Color, radius: BorderRadius, width: f32) {
+        let rect = self.transform_rect(rect);
+        self.commands.push(DrawCommand::StrokeRoundedRect { rect, color, radius, width });
+    }
+
     /// Draw a line.
     pub fn draw_line(&mut self, from: Point, to: Point, color: Color, width: f32) {
         let from = self.transform_point(from);
@@ -160,6 +166,12 @@ pub enum DrawCommand {
         rect: Rect,
         color: Color,
         radius: BorderRadius,
+    },
+    StrokeRoundedRect {
+        rect: Rect,
+        color: Color,
+        radius: BorderRadius,
+        width: f32,
     },
     Text {
         text: String,

@@ -279,6 +279,11 @@ impl Color {
         ]
     }
 
+    /// Convert to f32 RGBA values (0.0-1.0).
+    pub fn to_rgba_f32(&self) -> [f32; 4] {
+        [self.r, self.g, self.b, self.a]
+    }
+
     /// Blend this color with another using alpha compositing.
     pub fn blend(&self, other: &Color) -> Color {
         let a = other.a + self.a * (1.0 - other.a);
