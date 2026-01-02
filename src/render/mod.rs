@@ -336,17 +336,17 @@ fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
     let mut current_y = 0.0f32;
     let mut start_x = 0.0f32;
     let mut start_y = 0.0f32;
-    
+
     // Tokenize: split on commands while keeping the command letter
     let mut chars = path_str.chars().peekable();
     let mut current_cmd = ' ';
-    
+
     while chars.peek().is_some() {
         // Skip whitespace and commas
         while chars.peek().map(|c| c.is_whitespace() || *c == ',').unwrap_or(false) {
             chars.next();
         }
-        
+
         // Check for command letter
         if let Some(&c) = chars.peek() {
             if c.is_ascii_alphabetic() {
@@ -355,7 +355,7 @@ fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
                 continue;
             }
         }
-        
+
         // Parse numbers based on current command
         let mut nums = Vec::new();
         let count_needed = match current_cmd.to_ascii_uppercase() {
@@ -369,13 +369,13 @@ fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
             'Z' => 0,
             _ => 0,
         };
-        
+
         for _ in 0..count_needed {
             // Skip whitespace and commas
             while chars.peek().map(|c| c.is_whitespace() || *c == ',').unwrap_or(false) {
                 chars.next();
             }
-            
+
             // Parse number
             let mut num_str = String::new();
             if chars.peek() == Some(&'-') || chars.peek() == Some(&'+') {
@@ -398,7 +398,7 @@ fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
                 nums.push(n);
             }
         }
-        
+
         let is_relative = current_cmd.is_ascii_lowercase();
         match current_cmd.to_ascii_uppercase() {
             'M' if nums.len() >= 2 => {
@@ -477,7 +477,7 @@ fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
             _ => {}
         }
     }
-    
+
     pb.finish()
 }
 

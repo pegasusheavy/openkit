@@ -3,7 +3,7 @@ members = [".", "openkit-macros"]
 
 [package]
 name = "openkit"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 description = "A cross-platform CSS-styled UI framework for Rust"
 license = "MIT OR Apache-2.0"
@@ -41,7 +41,7 @@ freebsd = ["x11"]
 
 [dependencies]
 # Proc macros (optional, enabled by default)
-openkit-macros = { version = "0.1.2", path = "openkit-macros", optional = true }
+openkit-macros = { version = "0.1.3", path = "openkit-macros", optional = true }
 # Windowing
 winit = "0.30"
 

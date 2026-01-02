@@ -37,7 +37,7 @@ impl Painter {
     pub fn with_capacity(capacity: usize) -> Self {
         let mut transform_stack = SmallVec::new();
         transform_stack.push(Transform::identity());
-        
+
         Self {
             commands: Vec::with_capacity(capacity),
             clip_stack: SmallVec::new(),
