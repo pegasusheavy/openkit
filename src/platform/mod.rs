@@ -1,11 +1,101 @@
 //! Platform abstraction layer.
 //!
 //! Provides a unified interface for window management and event handling
-//! across Windows, macOS, and Linux using winit.
+//! across Windows, macOS, Linux, and FreeBSD using winit.
+//!
+//! # OpenKit's Rendering Model
+//!
+//! OpenKit renders its own chrome (window decorations, widgets, etc.) using:
+//! - **wgpu** for GPU-accelerated rendering (Direct3D 12, Metal, Vulkan, OpenGL)
+//! - **tiny-skia** as a CPU fallback
+//!
+//! No platform-specific UI libraries are used. This ensures:
+//! - Pixel-perfect consistency across all platforms
+//! - Full control over styling via CSS
+//! - No dependency on system UI frameworks
+//!
+//! # Supported Platforms
+//!
+//! | Platform | Window Backend | GPU Backend |
+//! |----------|---------------|-------------|
+//! | Windows 10+ | winit (Win32) | wgpu (DX12/Vulkan) |
+//! | macOS 10.15+ | winit (Cocoa) | wgpu (Metal) |
+//! | Linux | winit (X11/Wayland) | wgpu (Vulkan/GL) |
+//! | FreeBSD | winit (X11) | wgpu (Vulkan/GL) |
+//!
+//! # Platform Submodules
+//!
+//! Platform-specific submodules provide detection utilities only:
+//! - [`windows`] - Windows version detection
+//! - [`macos`] - macOS version detection
+//! - [`linux`] - Display server and DE detection
+//! - [`freebsd`] - DE detection
 
 mod window;
 
+// Platform-specific modules
+#[cfg(target_os = "windows")]
+pub mod windows;
+
+#[cfg(target_os = "macos")]
+pub mod macos;
+
+#[cfg(target_os = "linux")]
+pub mod linux;
+
+#[cfg(target_os = "freebsd")]
+pub mod freebsd;
+
 pub use window::{Window, WindowBuilder, WindowConfig};
+
+/// Initialize platform-specific features.
+/// Call this early in your application startup.
+pub fn init() {
+    #[cfg(target_os = "windows")]
+    windows::init();
+
+    #[cfg(target_os = "macos")]
+    macos::init();
+
+    #[cfg(target_os = "linux")]
+    linux::init();
+
+    #[cfg(target_os = "freebsd")]
+    freebsd::init();
+}
+
+/// Get the current platform name.
+pub fn platform_name() -> &'static str {
+    #[cfg(target_os = "windows")]
+    return "Windows";
+
+    #[cfg(target_os = "macos")]
+    return "macOS";
+
+    #[cfg(target_os = "linux")]
+    return "Linux";
+
+    #[cfg(target_os = "freebsd")]
+    return "FreeBSD";
+
+    #[cfg(not(any(
+        target_os = "windows",
+        target_os = "macos",
+        target_os = "linux",
+        target_os = "freebsd"
+    )))]
+    return "Unknown";
+}
+
+/// Check if the current platform is a desktop platform.
+pub fn is_desktop() -> bool {
+    cfg!(any(
+        target_os = "windows",
+        target_os = "macos",
+        target_os = "linux",
+        target_os = "freebsd"
+    ))
+}
 
 use crate::event::{Event, KeyEvent, KeyEventKind, Key, Modifiers, MouseButton, MouseEvent, MouseEventKind, WindowEvent};
 use crate::geometry::Point;

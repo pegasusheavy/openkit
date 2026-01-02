@@ -23,7 +23,7 @@ fn bench_painter_operations(c: &mut Criterion) {
         let mut painter = Painter::new();
         let rect = Rect::new(0.0, 0.0, 100.0, 50.0);
         let color = Color::from_rgb8(59, 130, 246);
-        let radius = BorderRadius::uniform(8.0);
+        let radius = BorderRadius::all(8.0);
         
         b.iter(|| {
             painter.fill_rounded_rect(black_box(rect), black_box(color), black_box(radius));

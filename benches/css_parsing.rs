@@ -179,33 +179,32 @@ fn bench_css_parsing(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_style_lookup(c: &mut Criterion) {
-    let mut group = c.benchmark_group("style_lookup");
+fn bench_style_manager(c: &mut Criterion) {
+    let mut group = c.benchmark_group("style_manager");
     
-    // Pre-load CSS
-    let mut manager = StyleManager::new();
-    manager.load_css(MEDIUM_CSS).unwrap();
-    
-    group.bench_function("single_class", |b| {
+    group.bench_function("create_new", |b| {
         b.iter(|| {
-            manager.get_style(black_box(".btn"))
+            black_box(StyleManager::new())
         })
     });
     
-    group.bench_function("multiple_classes", |b| {
+    group.bench_function("create_empty", |b| {
         b.iter(|| {
-            manager.get_style(black_box(".btn.btn-primary"))
+            black_box(StyleManager::empty())
         })
     });
     
-    group.bench_function("with_pseudo_class", |b| {
+    // Load and access
+    group.bench_function("load_and_access", |b| {
         b.iter(|| {
-            manager.get_style(black_box(".btn:hover"))
+            let mut manager = StyleManager::new();
+            manager.load_css(black_box(SIMPLE_CSS)).ok();
+            black_box(manager)
         })
     });
     
     group.finish();
 }
 
-criterion_group!(benches, bench_css_parsing, bench_style_lookup);
+criterion_group!(benches, bench_css_parsing, bench_style_manager);
 criterion_main!(benches);

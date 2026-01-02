@@ -121,8 +121,16 @@ impl Renderer {
                 DrawCommand::StrokeRoundedRect { rect, color, radius, width } => {
                     self.stroke_rounded_rect(*rect, *color, *radius, *width);
                 }
+                DrawCommand::Path { path, rect, color, viewbox } => {
+                    self.draw_path(path, *rect, *color, *viewbox);
+                }
             }
         }
+    }
+
+    /// Draw an SVG path scaled to fit within the given rect.
+    pub fn draw_path(&mut self, path: &str, rect: Rect, color: Color, viewbox: (f32, f32, f32, f32)) {
+        self.cpu.draw_path(path, rect, color, viewbox);
     }
 
     /// Draw a stroked rounded rectangle.
@@ -293,6 +301,184 @@ impl CpuRenderer {
             // For now, just indicate text area
         }
     }
+
+    /// Draw an SVG path scaled to fit within the given rect.
+    /// Parses basic SVG path commands: M, L, C, Q, Z (and lowercase variants).
+    pub fn draw_path(&mut self, path_str: &str, rect: Rect, color: Color, viewbox: (f32, f32, f32, f32)) {
+        let [r, g, b, a] = color.to_rgba8();
+        let paint = tiny_skia::Paint {
+            shader: tiny_skia::Shader::SolidColor(tiny_skia::Color::from_rgba8(r, g, b, a)),
+            anti_alias: true,
+            ..Default::default()
+        };
+
+        // Calculate scale and offset to fit path in rect
+        let (vb_x, vb_y, vb_w, vb_h) = viewbox;
+        let scale_x = rect.width() / vb_w;
+        let scale_y = rect.height() / vb_h;
+        let scale = scale_x.min(scale_y);
+        let offset_x = rect.x() - vb_x * scale + (rect.width() - vb_w * scale) / 2.0;
+        let offset_y = rect.y() - vb_y * scale + (rect.height() - vb_h * scale) / 2.0;
+
+        if let Some(path) = parse_svg_path(path_str) {
+            let transform = tiny_skia::Transform::from_scale(scale, scale)
+                .post_translate(offset_x, offset_y);
+            self.pixmap.fill_path(&path, &paint, tiny_skia::FillRule::Winding, transform, None);
+        }
+    }
+}
+
+/// Parse a simplified SVG path string into a tiny_skia::Path.
+/// Supports: M/m, L/l, H/h, V/v, C/c, Q/q, A/a, Z/z
+fn parse_svg_path(path_str: &str) -> Option<tiny_skia::Path> {
+    let mut pb = tiny_skia::PathBuilder::new();
+    let mut current_x = 0.0f32;
+    let mut current_y = 0.0f32;
+    let mut start_x = 0.0f32;
+    let mut start_y = 0.0f32;
+    
+    // Tokenize: split on commands while keeping the command letter
+    let mut chars = path_str.chars().peekable();
+    let mut current_cmd = ' ';
+    
+    while chars.peek().is_some() {
+        // Skip whitespace and commas
+        while chars.peek().map(|c| c.is_whitespace() || *c == ',').unwrap_or(false) {
+            chars.next();
+        }
+        
+        // Check for command letter
+        if let Some(&c) = chars.peek() {
+            if c.is_ascii_alphabetic() {
+                current_cmd = c;
+                chars.next();
+                continue;
+            }
+        }
+        
+        // Parse numbers based on current command
+        let mut nums = Vec::new();
+        let count_needed = match current_cmd.to_ascii_uppercase() {
+            'M' | 'L' => 2,
+            'H' | 'V' => 1,
+            'C' => 6,
+            'S' => 4,
+            'Q' => 4,
+            'T' => 2,
+            'A' => 7,
+            'Z' => 0,
+            _ => 0,
+        };
+        
+        for _ in 0..count_needed {
+            // Skip whitespace and commas
+            while chars.peek().map(|c| c.is_whitespace() || *c == ',').unwrap_or(false) {
+                chars.next();
+            }
+            
+            // Parse number
+            let mut num_str = String::new();
+            if chars.peek() == Some(&'-') || chars.peek() == Some(&'+') {
+                num_str.push(chars.next().unwrap());
+            }
+            while chars.peek().map(|c| c.is_ascii_digit() || *c == '.').unwrap_or(false) {
+                num_str.push(chars.next().unwrap());
+            }
+            // Handle scientific notation
+            if chars.peek() == Some(&'e') || chars.peek() == Some(&'E') {
+                num_str.push(chars.next().unwrap());
+                if chars.peek() == Some(&'-') || chars.peek() == Some(&'+') {
+                    num_str.push(chars.next().unwrap());
+                }
+                while chars.peek().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                    num_str.push(chars.next().unwrap());
+                }
+            }
+            if let Ok(n) = num_str.parse::<f32>() {
+                nums.push(n);
+            }
+        }
+        
+        let is_relative = current_cmd.is_ascii_lowercase();
+        match current_cmd.to_ascii_uppercase() {
+            'M' if nums.len() >= 2 => {
+                let (x, y) = if is_relative {
+                    (current_x + nums[0], current_y + nums[1])
+                } else {
+                    (nums[0], nums[1])
+                };
+                pb.move_to(x, y);
+                current_x = x;
+                current_y = y;
+                start_x = x;
+                start_y = y;
+            }
+            'L' if nums.len() >= 2 => {
+                let (x, y) = if is_relative {
+                    (current_x + nums[0], current_y + nums[1])
+                } else {
+                    (nums[0], nums[1])
+                };
+                pb.line_to(x, y);
+                current_x = x;
+                current_y = y;
+            }
+            'H' if nums.len() >= 1 => {
+                let x = if is_relative { current_x + nums[0] } else { nums[0] };
+                pb.line_to(x, current_y);
+                current_x = x;
+            }
+            'V' if nums.len() >= 1 => {
+                let y = if is_relative { current_y + nums[0] } else { nums[0] };
+                pb.line_to(current_x, y);
+                current_y = y;
+            }
+            'C' if nums.len() >= 6 => {
+                let (x1, y1, x2, y2, x, y) = if is_relative {
+                    (current_x + nums[0], current_y + nums[1],
+                     current_x + nums[2], current_y + nums[3],
+                     current_x + nums[4], current_y + nums[5])
+                } else {
+                    (nums[0], nums[1], nums[2], nums[3], nums[4], nums[5])
+                };
+                pb.cubic_to(x1, y1, x2, y2, x, y);
+                current_x = x;
+                current_y = y;
+            }
+            'Q' if nums.len() >= 4 => {
+                let (x1, y1, x, y) = if is_relative {
+                    (current_x + nums[0], current_y + nums[1],
+                     current_x + nums[2], current_y + nums[3])
+                } else {
+                    (nums[0], nums[1], nums[2], nums[3])
+                };
+                pb.quad_to(x1, y1, x, y);
+                current_x = x;
+                current_y = y;
+            }
+            'A' if nums.len() >= 7 => {
+                // Arc: rx, ry, x-axis-rotation, large-arc-flag, sweep-flag, x, y
+                // tiny_skia doesn't have direct arc support, approximate with lines for now
+                let (x, y) = if is_relative {
+                    (current_x + nums[5], current_y + nums[6])
+                } else {
+                    (nums[5], nums[6])
+                };
+                // Fallback: just draw a line to the endpoint
+                pb.line_to(x, y);
+                current_x = x;
+                current_y = y;
+            }
+            'Z' => {
+                pb.close();
+                current_x = start_x;
+                current_y = start_y;
+            }
+            _ => {}
+        }
+    }
+    
+    pb.finish()
 }
 
 impl Default for CpuRenderer {

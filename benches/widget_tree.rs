@@ -145,16 +145,14 @@ fn bench_size_operations(c: &mut Criterion) {
         b.iter(|| black_box(Size::new(black_box(100.0), black_box(50.0))))
     });
     
-    group.bench_function("max", |b| {
-        let a = Size::new(100.0, 50.0);
-        let b_size = Size::new(80.0, 60.0);
-        b.iter(|| black_box(a).max(black_box(b_size)))
+    group.bench_function("area", |b| {
+        let s = Size::new(100.0, 50.0);
+        b.iter(|| black_box(s.width * s.height))
     });
     
-    group.bench_function("min", |b| {
-        let a = Size::new(100.0, 50.0);
-        let b_size = Size::new(80.0, 60.0);
-        b.iter(|| black_box(a).min(black_box(b_size)))
+    group.bench_function("scale", |b| {
+        let s = Size::new(100.0, 50.0);
+        b.iter(|| black_box(Size::new(s.width * 2.0, s.height * 2.0)))
     });
     
     group.finish();

@@ -1,9 +1,18 @@
 //! Geometry primitives for OpenKit.
+//!
+//! # Performance
+//!
+//! All geometry operations are optimized for speed with:
+//! - `#[inline]` hints on hot paths
+//! - `const fn` where possible
+//! - Copy semantics for small structs
+//! - SIMD-friendly data layouts
 
 use std::ops::{Add, Sub, Mul};
 
 /// A 2D point.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[repr(C)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -12,20 +21,40 @@ pub struct Point {
 impl Point {
     pub const ZERO: Point = Point { x: 0.0, y: 0.0 };
 
+    #[inline(always)]
     pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
 
+    #[inline]
     pub fn distance(&self, other: &Point) -> f32 {
         let dx = self.x - other.x;
         let dy = self.y - other.y;
         (dx * dx + dy * dy).sqrt()
+    }
+
+    /// Squared distance (faster than distance, use for comparisons).
+    #[inline(always)]
+    pub fn distance_squared(&self, other: &Point) -> f32 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        dx * dx + dy * dy
+    }
+
+    /// Linear interpolation between two points.
+    #[inline]
+    pub fn lerp(&self, other: &Point, t: f32) -> Point {
+        Point::new(
+            self.x + (other.x - self.x) * t,
+            self.y + (other.y - self.y) * t,
+        )
     }
 }
 
 impl Add for Point {
     type Output = Point;
 
+    #[inline(always)]
     fn add(self, other: Point) -> Point {
         Point::new(self.x + other.x, self.y + other.y)
     }
@@ -34,6 +63,7 @@ impl Add for Point {
 impl Sub for Point {
     type Output = Point;
 
+    #[inline(always)]
     fn sub(self, other: Point) -> Point {
         Point::new(self.x - other.x, self.y - other.y)
     }
@@ -41,6 +71,7 @@ impl Sub for Point {
 
 /// A 2D size.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[repr(C)]
 pub struct Size {
     pub width: f32,
     pub height: f32,
@@ -49,22 +80,53 @@ pub struct Size {
 impl Size {
     pub const ZERO: Size = Size { width: 0.0, height: 0.0 };
 
+    #[inline(always)]
     pub const fn new(width: f32, height: f32) -> Self {
         Self { width, height }
     }
 
+    #[inline(always)]
     pub fn area(&self) -> f32 {
         self.width * self.height
     }
 
+    #[inline]
     pub fn contains(&self, other: &Size) -> bool {
         self.width >= other.width && self.height >= other.height
+    }
+
+    /// Component-wise maximum.
+    #[inline]
+    pub fn max(&self, other: Size) -> Size {
+        Size::new(
+            self.width.max(other.width),
+            self.height.max(other.height),
+        )
+    }
+
+    /// Component-wise minimum.
+    #[inline]
+    pub fn min(&self, other: Size) -> Size {
+        Size::new(
+            self.width.min(other.width),
+            self.height.min(other.height),
+        )
+    }
+
+    /// Clamp size to constraints.
+    #[inline]
+    pub fn clamp(&self, min: Size, max: Size) -> Size {
+        Size::new(
+            self.width.clamp(min.width, max.width),
+            self.height.clamp(min.height, max.height),
+        )
     }
 }
 
 impl Mul<f32> for Size {
     type Output = Size;
 
+    #[inline(always)]
     fn mul(self, scale: f32) -> Size {
         Size::new(self.width * scale, self.height * scale)
     }
@@ -72,6 +134,7 @@ impl Mul<f32> for Size {
 
 /// A 2D rectangle defined by origin and size.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[repr(C)]
 pub struct Rect {
     pub origin: Point,
     pub size: Size,
@@ -83,6 +146,7 @@ impl Rect {
         size: Size::ZERO,
     };
 
+    #[inline(always)]
     pub const fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
         Self {
             origin: Point::new(x, y),
@@ -90,22 +154,27 @@ impl Rect {
         }
     }
 
+    #[inline(always)]
     pub fn from_origin_size(origin: Point, size: Size) -> Self {
         Self { origin, size }
     }
 
+    #[inline(always)]
     pub fn x(&self) -> f32 {
         self.origin.x
     }
 
+    #[inline(always)]
     pub fn y(&self) -> f32 {
         self.origin.y
     }
 
+    #[inline(always)]
     pub fn width(&self) -> f32 {
         self.size.width
     }
 
+    #[inline(always)]
     pub fn height(&self) -> f32 {
         self.size.height
     }
@@ -118,10 +187,12 @@ impl Rect {
         self.origin.y
     }
 
+    #[inline(always)]
     pub fn max_x(&self) -> f32 {
         self.origin.x + self.size.width
     }
 
+    #[inline(always)]
     pub fn max_y(&self) -> f32 {
         self.origin.y + self.size.height
     }
@@ -133,18 +204,32 @@ impl Rect {
         )
     }
 
+    /// Check if a point is inside this rectangle.
+    #[inline]
     pub fn contains(&self, point: Point) -> bool {
-        point.x >= self.min_x()
-            && point.x <= self.max_x()
-            && point.y >= self.min_y()
-            && point.y <= self.max_y()
+        // Optimized: inline the min/max calls to avoid method overhead
+        let x = self.origin.x;
+        let y = self.origin.y;
+        let max_x = x + self.size.width;
+        let max_y = y + self.size.height;
+        point.x >= x && point.x <= max_x && point.y >= y && point.y <= max_y
     }
 
+    /// Check if this rectangle intersects with another.
+    #[inline]
     pub fn intersects(&self, other: &Rect) -> bool {
-        self.min_x() < other.max_x()
-            && self.max_x() > other.min_x()
-            && self.min_y() < other.max_y()
-            && self.max_y() > other.min_y()
+        // Optimized: inline calculations for better performance
+        let ax = self.origin.x;
+        let ay = self.origin.y;
+        let ax2 = ax + self.size.width;
+        let ay2 = ay + self.size.height;
+        
+        let bx = other.origin.x;
+        let by = other.origin.y;
+        let bx2 = bx + other.size.width;
+        let by2 = by + other.size.height;
+        
+        ax < bx2 && ax2 > bx && ay < by2 && ay2 > by
     }
 
     pub fn inset(&self, amount: f32) -> Rect {
@@ -167,7 +252,11 @@ impl Rect {
 }
 
 /// A color in RGBA format.
+///
+/// Colors are stored as f32 values in the range 0.0-1.0.
+/// All operations are optimized with inline hints for performance.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(C)]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -183,26 +272,33 @@ impl Color {
     pub const GREEN: Color = Color::rgb(0.0, 1.0, 0.0);
     pub const BLUE: Color = Color::rgb(0.0, 0.0, 1.0);
 
+    #[inline(always)]
     pub const fn rgb(r: f32, g: f32, b: f32) -> Self {
         Self { r, g, b, a: 1.0 }
     }
 
+    #[inline(always)]
     pub const fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self { r, g, b, a }
     }
 
     /// Create a color from 8-bit RGB values (0-255).
+    #[inline]
     pub fn from_rgb8(r: u8, g: u8, b: u8) -> Self {
-        Self::rgb(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0)
+        // Multiply by reciprocal for speed (compiler may optimize this)
+        const INV_255: f32 = 1.0 / 255.0;
+        Self::rgb(r as f32 * INV_255, g as f32 * INV_255, b as f32 * INV_255)
     }
 
     /// Create a color from 8-bit RGBA values (0-255).
+    #[inline]
     pub fn from_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
+        const INV_255: f32 = 1.0 / 255.0;
         Self::rgba(
-            r as f32 / 255.0,
-            g as f32 / 255.0,
-            b as f32 / 255.0,
-            a as f32 / 255.0,
+            r as f32 * INV_255,
+            g as f32 * INV_255,
+            b as f32 * INV_255,
+            a as f32 * INV_255,
         )
     }
 
@@ -270,21 +366,25 @@ impl Color {
     }
 
     /// Convert to 8-bit RGBA values.
+    #[inline]
     pub fn to_rgba8(&self) -> [u8; 4] {
+        // Fast path: avoid clamp for well-formed colors
         [
-            (self.r * 255.0).clamp(0.0, 255.0) as u8,
-            (self.g * 255.0).clamp(0.0, 255.0) as u8,
-            (self.b * 255.0).clamp(0.0, 255.0) as u8,
-            (self.a * 255.0).clamp(0.0, 255.0) as u8,
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+            (self.a * 255.0 + 0.5) as u8,
         ]
     }
 
     /// Convert to f32 RGBA values (0.0-1.0).
+    #[inline(always)]
     pub fn to_rgba_f32(&self) -> [f32; 4] {
         [self.r, self.g, self.b, self.a]
     }
 
     /// Blend this color with another using alpha compositing.
+    #[inline]
     pub fn blend(&self, other: &Color) -> Color {
         let a = other.a + self.a * (1.0 - other.a);
         if a == 0.0 {

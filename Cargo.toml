@@ -17,15 +17,27 @@ categories = ["gui", "rendering"]
 rust-version = "1.85"
 
 [features]
-default = ["gpu", "macros", "x11", "wayland"]
+default = ["gpu", "macros", "native-platform"]
 gpu = ["wgpu"]
 macros = ["openkit-macros"]
-# Platform backends (Linux)
+
+# Platform auto-detection (enabled by default)
+# This enables the appropriate backend for each platform automatically
+native-platform = []
+
+# Linux display backends (can be enabled explicitly)
 wayland = ["winit/wayland", "winit/wayland-csd-adwaita"]
 x11 = ["winit/x11"]
+
 # High-performance GPU features
 gpu-profiling = ["gpu"]
 hdr = ["gpu"]
+
+# Platform-specific feature bundles for explicit control
+windows = []
+macos = []
+linux = ["x11", "wayland"]
+freebsd = ["x11"]
 
 [dependencies]
 # Proc macros (optional, enabled by default)
@@ -75,6 +87,10 @@ smallvec = "1"
 
 # Unicode segmentation for text
 unicode-segmentation = "1"
+
+# NOTE: OpenKit does NOT depend on platform-specific UI libraries.
+# All rendering (windows, widgets, chrome) is done via wgpu/tiny-skia.
+# Platform windowing is handled entirely by winit.
 
 [dev-dependencies]
 pretty_assertions = "1"

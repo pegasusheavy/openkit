@@ -2,8 +2,15 @@
 //!
 //! A cross-platform CSS-styled UI framework for Rust.
 //!
-//! OpenKit provides a consistent, beautiful UI experience across Windows, macOS, and Linux
-//! with CSS-powered styling and a Tailwind-inspired design system.
+//! OpenKit provides a consistent, beautiful UI experience across Windows, macOS, Linux,
+//! and FreeBSD with CSS-powered styling and a Tailwind-inspired design system.
+//!
+//! ## Supported Platforms
+//!
+//! - **Windows**: Windows 10 and later
+//! - **macOS**: macOS 10.15 (Catalina) and later
+//! - **Linux**: X11 and Wayland (GNOME, KDE, Sway, Hyprland, etc.)
+//! - **FreeBSD**: X11 with common desktop environments
 //!
 //! ## Quick Start
 //!
@@ -135,6 +142,9 @@ pub mod prelude {
     // Re-export proc macros when enabled
     #[cfg(feature = "macros")]
     pub use openkit_macros::{Widget, Component, Styleable, component, prop, state, event};
+
+    // Platform utilities
+    pub use crate::platform::{init as platform_init, platform_name, is_desktop};
 }
 
 /// Re-export of the error types

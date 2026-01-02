@@ -2,11 +2,20 @@
 
 A cross-platform CSS-styled UI framework for Rust.
 
-OpenKit provides a consistent, beautiful desktop application experience across Windows, macOS, and Linux with CSS-powered styling and a Tailwind-inspired design system.
+OpenKit provides a consistent, beautiful desktop application experience across Windows, macOS, Linux, and FreeBSD with CSS-powered styling and a Tailwind-inspired design system.
+
+## Supported Platforms
+
+| Platform | Backend | GPU API | Status |
+|----------|---------|---------|--------|
+| Windows 10+ | Win32 | Direct3D 12 / Vulkan | ✅ Fully Supported |
+| macOS 10.15+ | Cocoa | Metal | ✅ Fully Supported |
+| Linux | X11 / Wayland | Vulkan / OpenGL | ✅ Fully Supported |
+| FreeBSD | X11 | Vulkan / OpenGL | ✅ Fully Supported |
 
 ## Features
 
-- **Cross-Platform**: Native look and feel on Windows, macOS, and Linux
+- **Cross-Platform**: Native look and feel on Windows, macOS, Linux, and FreeBSD
 - **CSS Styling**: Style your UI with familiar CSS syntax
 - **GPU Accelerated**: High-performance rendering with wgpu (with CPU fallback)
 - **Rich Widget Set**: 30+ widgets for building complete desktop applications
@@ -132,6 +141,56 @@ let desktop = Desktop::new()
     .icon(DesktopIcon::new("home", "Home", "🏠").at(0, 0))
     .icon(DesktopIcon::new("files", "Files", "📁").at(0, 1));
 ```
+
+## Rendering Model
+
+OpenKit renders **its own chrome** - all window decorations, widgets, and UI elements are rendered by OpenKit itself using GPU acceleration. This ensures:
+
+- **Pixel-perfect consistency** across all platforms
+- **Full CSS control** over every visual element
+- **No platform UI dependencies** - just winit for windowing and wgpu for rendering
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Your Application                      │
+├─────────────────────────────────────────────────────────┤
+│                     OpenKit Widgets                      │
+│  (Button, Label, TextField, Window, Desktop, etc.)      │
+├─────────────────────────────────────────────────────────┤
+│                    OpenKit Renderer                      │
+│           wgpu (GPU) │ tiny-skia (CPU fallback)         │
+├─────────────────────────────────────────────────────────┤
+│                        winit                             │
+│              (Platform window creation)                  │
+├────────────┬────────────┬─────────────┬─────────────────┤
+│  Windows   │   macOS    │    Linux    │    FreeBSD      │
+│  (Win32)   │  (Cocoa)   │ (X11/Wayland)│     (X11)      │
+└────────────┴────────────┴─────────────┴─────────────────┘
+```
+
+### Platform Detection
+
+Each platform has detection utilities (no external UI libraries required):
+
+- **Windows**: Version detection, theme preference
+- **macOS**: Version detection, theme preference
+- **Linux**: Display server (X11/Wayland), desktop environment (GNOME, KDE, etc.)
+- **FreeBSD**: Desktop environment detection
+
+## Feature Flags
+
+```toml
+[dependencies]
+openkit = { version = "0.1", features = ["gpu", "macros"] }
+```
+
+| Feature | Description | Default |
+|---------|-------------|---------|
+| `gpu` | GPU-accelerated rendering via wgpu | ✅ |
+| `macros` | Declarative UI macros (`col!`, `button!`, etc.) | ✅ |
+| `wayland` | Wayland support (Linux) | ✅ |
+| `x11` | X11 support (Linux/FreeBSD) | ✅ |
+| `hdr` | HDR support (when available) | ❌ |
 
 ## License
 

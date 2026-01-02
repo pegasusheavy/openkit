@@ -1,13 +1,75 @@
 //! Text rendering using cosmic-text.
+//!
+//! # Performance
+//!
+//! The TextRenderer includes optimizations:
+//! - LRU cache for text measurements (avoids repeated shaping)
+//! - Pre-allocated buffers where possible
+//! - Inline hints on hot paths
 
 use crate::geometry::Size;
 use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping, SwashCache};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::hash::{Hash, Hasher};
+
+/// Maximum number of cached text measurements.
+const MEASURE_CACHE_SIZE: usize = 256;
+
+/// Key for text measurement cache.
+#[derive(Clone, Eq, PartialEq)]
+struct MeasureCacheKey {
+    text: String,
+    font_size_bits: u32,
+}
+
+impl Hash for MeasureCacheKey {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.text.hash(state);
+        self.font_size_bits.hash(state);
+    }
+}
 
 /// Text renderer using cosmic-text.
 pub struct TextRenderer {
     font_system: Arc<Mutex<FontSystem>>,
     swash_cache: SwashCache,
+    /// Cache for text measurements (text+size -> dimensions)
+    measure_cache: Mutex<MeasureCache>,
+}
+
+/// LRU-like cache for text measurements.
+struct MeasureCache {
+    entries: HashMap<MeasureCacheKey, Size>,
+    order: Vec<MeasureCacheKey>,
+}
+
+impl MeasureCache {
+    fn new() -> Self {
+        Self {
+            entries: HashMap::with_capacity(MEASURE_CACHE_SIZE),
+            order: Vec::with_capacity(MEASURE_CACHE_SIZE),
+        }
+    }
+
+    fn get(&self, key: &MeasureCacheKey) -> Option<Size> {
+        self.entries.get(key).copied()
+    }
+
+    fn insert(&mut self, key: MeasureCacheKey, size: Size) {
+        // Simple eviction: remove oldest when full
+        if self.entries.len() >= MEASURE_CACHE_SIZE && !self.order.is_empty() {
+            let old_key = self.order.remove(0);
+            self.entries.remove(&old_key);
+        }
+        self.entries.insert(key.clone(), size);
+        self.order.push(key);
+    }
+
+    fn clear(&mut self) {
+        self.entries.clear();
+        self.order.clear();
+    }
 }
 
 impl TextRenderer {
@@ -18,11 +80,45 @@ impl TextRenderer {
         Self {
             font_system: Arc::new(Mutex::new(font_system)),
             swash_cache,
+            measure_cache: Mutex::new(MeasureCache::new()),
         }
     }
 
-    /// Measure text dimensions.
+    /// Measure text dimensions with caching.
+    #[inline]
     pub fn measure(&self, text: &str, font_size: f32) -> Size {
+        // Quick path for empty text
+        if text.is_empty() {
+            return Size::new(0.0, font_size * 1.2);
+        }
+
+        // Check cache first
+        let key = MeasureCacheKey {
+            text: text.to_string(),
+            font_size_bits: font_size.to_bits(),
+        };
+
+        {
+            let cache = self.measure_cache.lock().unwrap();
+            if let Some(size) = cache.get(&key) {
+                return size;
+            }
+        }
+
+        // Cache miss - compute size
+        let size = self.measure_uncached(text, font_size);
+
+        // Update cache
+        {
+            let mut cache = self.measure_cache.lock().unwrap();
+            cache.insert(key, size);
+        }
+
+        size
+    }
+
+    /// Measure text without caching (for internal use).
+    fn measure_uncached(&self, text: &str, font_size: f32) -> Size {
         let mut font_system = self.font_system.lock().unwrap();
 
         let metrics = Metrics::new(font_size, font_size * 1.2);
@@ -40,6 +136,18 @@ impl TextRenderer {
         let height = buffer.layout_runs().count() as f32 * font_size * 1.2;
 
         Size::new(width, height.max(font_size * 1.2))
+    }
+
+    /// Clear the measurement cache.
+    pub fn clear_cache(&self) {
+        let mut cache = self.measure_cache.lock().unwrap();
+        cache.clear();
+    }
+
+    /// Get cache statistics.
+    pub fn cache_stats(&self) -> (usize, usize) {
+        let cache = self.measure_cache.lock().unwrap();
+        (cache.entries.len(), MEASURE_CACHE_SIZE)
     }
 
     /// Get a reference to the font system.

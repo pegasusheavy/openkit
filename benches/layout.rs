@@ -119,8 +119,17 @@ fn bench_rect_operations(c: &mut Criterion) {
         b.iter(|| black_box(rect).intersects(&black_box(other)))
     });
     
-    group.bench_function("union", |b| {
-        b.iter(|| black_box(rect).union(&black_box(other)))
+    group.bench_function("new", |b| {
+        b.iter(|| black_box(Rect::new(100.0, 100.0, 200.0, 150.0)))
+    });
+    
+    group.bench_function("accessors", |b| {
+        b.iter(|| {
+            black_box(rect.x());
+            black_box(rect.y());
+            black_box(rect.width());
+            black_box(rect.height());
+        })
     });
     
     group.finish();
