@@ -1,6 +1,7 @@
 //! Widget tree benchmarks
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId};
+use std::hint::black_box;
 use openkit::geometry::{Rect, Size, Point, Color};
 use openkit::widget::next_widget_id;
 use openkit::css::ClassList;
