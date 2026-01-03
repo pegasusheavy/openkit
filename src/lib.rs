@@ -114,6 +114,11 @@ pub mod prelude {
     pub use crate::widget::window::{Window, WindowVariant, WindowControlsStyle};
     pub use crate::widget::workspace::{WorkspaceSwitcher, WorkspaceItem};
 
+    // VPN widgets
+    pub use crate::widget::vpn_status::{VpnStatus, VpnConnectionStatus, VpnStatusSize};
+    pub use crate::widget::server_list::{ServerList, VpnServer};
+    pub use crate::widget::connection_card::{ConnectionCard, ConnectionStats, AuthMethod};
+
     // Component system (Angular-like)
     pub use crate::component::{
         // Core types

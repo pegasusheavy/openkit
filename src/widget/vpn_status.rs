@@ -44,13 +44,13 @@ impl VpnConnectionStatus {
     /// Get the color associated with this status.
     pub fn color(&self) -> Color {
         match self {
-            VpnConnectionStatus::Disconnected => Color::from_rgb(128, 128, 128),
+            VpnConnectionStatus::Disconnected => Color::rgb(0.5, 0.5, 0.5),
             VpnConnectionStatus::Connecting | VpnConnectionStatus::Authenticating => {
-                Color::from_rgb(255, 193, 7) // Amber/warning
+                Color::rgb(1.0, 0.757, 0.027) // Amber/warning
             }
-            VpnConnectionStatus::Connected => Color::from_rgb(34, 197, 94), // Green
-            VpnConnectionStatus::Disconnecting => Color::from_rgb(255, 193, 7),
-            VpnConnectionStatus::Error => Color::from_rgb(239, 68, 68), // Red
+            VpnConnectionStatus::Connected => Color::rgb(0.133, 0.773, 0.369), // Green
+            VpnConnectionStatus::Disconnecting => Color::rgb(1.0, 0.757, 0.027),
+            VpnConnectionStatus::Error => Color::rgb(0.937, 0.267, 0.267), // Red
         }
     }
 }

@@ -53,6 +53,11 @@ pub mod download_item;
 pub mod find_bar;
 pub mod navigation_bar;
 
+// VPN widgets
+pub mod vpn_status;
+pub mod server_list;
+pub mod connection_card;
+
 use crate::css::{ClassList, ComputedStyle, StyleContext, WidgetState};
 use crate::event::{Event, EventResult};
 use crate::geometry::{Point, Rect, Size};
