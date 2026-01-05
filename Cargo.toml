@@ -30,8 +30,11 @@ winit = "0.30"
 # GPU Rendering (optional, enabled by default)
 wgpu = { version = "23", optional = true }
 
-# CPU Rendering fallback
-tiny-skia = "0.11"
+# CPU Rendering (pure Rust Skia reimplementation)
+skia-rs-safe = "0.1"
+
+# Software buffer for CPU rendering presentation
+softbuffer = "0.4"
 
 # Text rendering
 cosmic-text = "0.12"
