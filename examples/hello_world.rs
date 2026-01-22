@@ -1,21 +1,46 @@
 //! Hello World example for OpenKit.
 //!
-//! The simplest possible OpenKit application using macros.
+//! A beautiful, minimal OpenKit application showcasing the design system.
 
 use openkit::prelude::*;
 
 fn main() {
     App::new()
         .title("Hello OpenKit")
-        .size(400.0, 300.0)
+        .size(500.0, 400.0)
         .theme(Theme::Light)
+        .load_css_file("examples/styles/openkit-design.css")
         .run(|| {
-            col![16;
-                label!("Hello, OpenKit!"),
-                button!("Click me!", {
-                    println!("Button clicked!");
-                }),
-            ]
+            // Centered card layout
+            Column::new()
+                .gap(0.0)
+                .padding(EdgeInsets::all(48.0))
+                .class("demo-root")
+                .child(
+                    Column::new()
+                        .gap(24.0)
+                        .padding(EdgeInsets::all(32.0))
+                        .class("card")
+                        .child(
+                            col![8;
+                                label!("Welcome to OpenKit", class: "heading"),
+                                label!("A modern UI toolkit for Rust", class: "subtitle"),
+                            ]
+                        )
+                        .child(
+                            col![16;
+                                button!("Get Started", Primary, {
+                                    println!("Let's go!");
+                                }),
+                                button!("Learn More", Outline, {
+                                    println!("Documentation...");
+                                }),
+                            ]
+                        )
+                        .child(
+                            label!("Built with love in Rust", class: "caption")
+                        )
+                )
         })
         .expect("Failed to run application");
 }

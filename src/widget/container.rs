@@ -185,10 +185,40 @@ impl Widget for Column {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        // Propagate to children in reverse order (front to back)
-        for child in self.children.iter_mut().rev() {
-            if child.handle_event(event, ctx) == EventResult::Handled {
-                return EventResult::Handled;
+        // Transform mouse events to child coordinates and propagate
+        if let Event::Mouse(mouse) = event {
+            // Check children in reverse order (front to back)
+            for (i, child) in self.children.iter_mut().enumerate().rev() {
+                if let Some(pos) = self.child_positions.get(i) {
+                    // Calculate child's global bounds
+                    let parent_origin = self.base.bounds.origin;
+                    let child_global_rect = Rect::new(
+                        parent_origin.x + pos.x,
+                        parent_origin.y + pos.y,
+                        child.bounds().width(),
+                        child.bounds().height(),
+                    );
+                    
+                    // Check if mouse is in child's bounds
+                    if child_global_rect.contains(mouse.position) {
+                        // Temporarily set child's bounds to global for event handling
+                        let old_bounds = child.bounds();
+                        child.set_bounds(child_global_rect);
+                        let result = child.handle_event(event, ctx);
+                        child.set_bounds(old_bounds);
+                        
+                        if result == EventResult::Handled {
+                            return EventResult::Handled;
+                        }
+                    }
+                }
+            }
+        } else {
+            // For non-mouse events, propagate normally
+            for child in self.children.iter_mut().rev() {
+                if child.handle_event(event, ctx) == EventResult::Handled {
+                    return EventResult::Handled;
+                }
             }
         }
         EventResult::Ignored
@@ -388,10 +418,40 @@ impl Widget for Row {
     }
 
     fn handle_event(&mut self, event: &Event, ctx: &mut EventContext) -> EventResult {
-        // Propagate to children in reverse order (front to back)
-        for child in self.children.iter_mut().rev() {
-            if child.handle_event(event, ctx) == EventResult::Handled {
-                return EventResult::Handled;
+        // Transform mouse events to child coordinates and propagate
+        if let Event::Mouse(mouse) = event {
+            // Check children in reverse order (front to back)
+            for (i, child) in self.children.iter_mut().enumerate().rev() {
+                if let Some(pos) = self.child_positions.get(i) {
+                    // Calculate child's global bounds
+                    let parent_origin = self.base.bounds.origin;
+                    let child_global_rect = Rect::new(
+                        parent_origin.x + pos.x,
+                        parent_origin.y + pos.y,
+                        child.bounds().width(),
+                        child.bounds().height(),
+                    );
+                    
+                    // Check if mouse is in child's bounds
+                    if child_global_rect.contains(mouse.position) {
+                        // Temporarily set child's bounds to global for event handling
+                        let old_bounds = child.bounds();
+                        child.set_bounds(child_global_rect);
+                        let result = child.handle_event(event, ctx);
+                        child.set_bounds(old_bounds);
+                        
+                        if result == EventResult::Handled {
+                            return EventResult::Handled;
+                        }
+                    }
+                }
+            }
+        } else {
+            // For non-mouse events, propagate normally
+            for child in self.children.iter_mut().rev() {
+                if child.handle_event(event, ctx) == EventResult::Handled {
+                    return EventResult::Handled;
+                }
             }
         }
         EventResult::Ignored

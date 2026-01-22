@@ -12,7 +12,7 @@ The absolute minimum to open a styled window with basic widgets on all three pla
 - [ ] Define `Platform` trait for OS-specific implementations
 - [ ] Windows backend: Win32 for window, custom rendering for widgets
 - [ ] macOS backend: AppKit for window, custom rendering for widgets
-- [ ] Linux backend: GTK4/X11/Wayland for window, custom rendering for widgets
+- [x] Linux backend: winit (direct X11/Wayland) for window, custom rendering for widgets (NO GTK!)
 - [ ] Runtime platform detection and backend selection
 
 ### Rendering Engine
@@ -506,7 +506,7 @@ Expand the widget library with full CSS styling support.
 ├─────────────────────────────────────────────────────────────┤
 │                   Platform Window                            │
 │  ┌────────────┐  ┌────────────┐  ┌────────────────────┐    │
-│  │   Win32    │  │   AppKit   │  │  GTK4/X11/Wayland  │    │
+│  │   Win32    │  │   AppKit   │  │   X11/Wayland      │    │
 │  └────────────┘  └────────────┘  └────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
 ```

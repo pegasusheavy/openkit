@@ -268,6 +268,33 @@ impl App {
                         // Dispatch event to widgets
                         s.root.handle_event(&event, &mut s.event_ctx);
 
+                        // Handle theme change requests
+                        use crate::widget::ThemeRequest;
+                        match s.event_ctx.theme_request {
+                            ThemeRequest::Light => {
+                                s.theme_data = ThemeData::light();
+                                s.event_ctx.is_dark_theme = false;
+                                s.needs_paint = true;
+                            }
+                            ThemeRequest::Dark => {
+                                s.theme_data = ThemeData::dark();
+                                s.event_ctx.is_dark_theme = true;
+                                s.needs_paint = true;
+                            }
+                            ThemeRequest::Toggle => {
+                                if s.event_ctx.is_dark_theme {
+                                    s.theme_data = ThemeData::light();
+                                    s.event_ctx.is_dark_theme = false;
+                                } else {
+                                    s.theme_data = ThemeData::dark();
+                                    s.event_ctx.is_dark_theme = true;
+                                }
+                                s.needs_paint = true;
+                            }
+                            ThemeRequest::None => {}
+                        }
+                        s.event_ctx.theme_request = ThemeRequest::None;
+
                         if s.event_ctx.should_redraw {
                             s.event_ctx.should_redraw = false;
                             s.needs_paint = true;
@@ -301,8 +328,9 @@ impl App {
                             ));
                         }
 
-                        // Paint if needed
-                        if s.needs_paint {
+                        // Paint if needed (or force paint for initial frames on X11)
+                        let force_paint = s.renderer.needs_initial_frames();
+                        if s.needs_paint || force_paint {
                             s.needs_paint = false;
                             let size = s.window.size();
                             let style_ctx = if let Some(sm) = &s.style_manager {
@@ -327,6 +355,11 @@ impl App {
                             s.renderer.draw(&commands);
 
                             s.renderer.end_frame();
+                            
+                            // Request more redraws for initial X11 timing workaround
+                            if s.renderer.needs_initial_frames() {
+                                s.window.request_redraw();
+                            }
                         }
                     }
                 }

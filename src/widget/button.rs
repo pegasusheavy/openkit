@@ -88,12 +88,21 @@ impl Button {
             ButtonVariant::Destructive => theme.colors.destructive,
         };
 
+        // Ghost and outline get hover backgrounds
+        let hover_bg = match self.variant {
+            ButtonVariant::Ghost | ButtonVariant::Outline => theme.colors.muted.with_alpha(0.8),
+            _ => base.darken(8.0),
+        };
+
         if self.base.state.disabled {
             base.with_alpha(0.5)
         } else if self.base.state.pressed {
-            base.darken(15.0)
+            match self.variant {
+                ButtonVariant::Ghost | ButtonVariant::Outline => theme.colors.muted,
+                _ => base.darken(12.0),
+            }
         } else if self.base.state.hovered {
-            base.darken(10.0)
+            hover_bg
         } else {
             base
         }
@@ -133,13 +142,13 @@ impl Widget for Button {
     }
 
     fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
-        // Estimate text size plus padding
+        // Tailwind-style button sizing (px-4 py-2.5 with medium font)
         let font_size = 14.0;
-        let char_width = font_size * 0.6;
+        let char_width = font_size * 0.55; // Slightly tighter character spacing
         let text_width = self.label.len() as f32 * char_width;
-        let padding_h = 16.0 * 2.0; // px-4
-        let padding_v = 8.0 * 2.0;  // py-2
-        Size::new(text_width + padding_h, font_size * 1.5 + padding_v)
+        let padding_h = 16.0 * 2.0; // px-4 (16px each side)
+        let padding_v = 10.0 * 2.0; // py-2.5 (10px each side)
+        Size::new(text_width + padding_h, font_size + padding_v)
     }
 
     fn layout(&mut self, constraints: Constraints, ctx: &LayoutContext) -> LayoutResult {
@@ -152,33 +161,51 @@ impl Widget for Button {
     fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
         let theme = ctx.style_ctx.theme;
 
-        // Background
-        let bg_color = self.background_color(theme);
-        let radius = BorderRadius::all(theme.radii.md * theme.typography.base_size);
-        painter.fill_rounded_rect(rect, bg_color, radius);
+        // Tailwind-style rounded corners (rounded-lg = 8px)
+        let radius = BorderRadius::all(8.0);
 
-        // Border for outline variant
-        if self.variant == ButtonVariant::Outline {
-            painter.stroke_rect(rect, theme.colors.border, 1.0);
+        // Shadow for depth (subtle shadow for primary/destructive, none for ghost/outline)
+        if !self.base.state.pressed && matches!(self.variant, ButtonVariant::Primary | ButtonVariant::Secondary | ButtonVariant::Destructive) {
+            // Draw shadow layer (offset down and slightly blurred effect via multiple rects)
+            let shadow_color = Color::rgba(0.0, 0.0, 0.0, 0.1);
+            let shadow_rect = Rect::new(rect.x(), rect.y() + 1.0, rect.width(), rect.height());
+            painter.fill_rounded_rect(shadow_rect, shadow_color, radius);
         }
 
-        // Text
+        // Background
+        let bg_color = self.background_color(theme);
+        painter.fill_rounded_rect(rect, bg_color, radius);
+
+        // Border for outline variant (Tailwind-style border)
+        if self.variant == ButtonVariant::Outline {
+            let border_color = if self.base.state.hovered {
+                theme.colors.foreground.with_alpha(0.2)
+            } else {
+                theme.colors.border
+            };
+            painter.stroke_rounded_rect(rect, border_color, 1.0, radius);
+        }
+
+        // Text - centered with proper font sizing
         let text_color = self.text_color(theme);
         let font_size = 14.0;
-        let text_x = rect.x() + (rect.width() - self.label.len() as f32 * font_size * 0.6) / 2.0;
-        let text_y = rect.y() + (rect.height() + font_size * 0.8) / 2.0;
+        let char_width = font_size * 0.55;
+        let text_width = self.label.len() as f32 * char_width;
+        let text_x = rect.x() + (rect.width() - text_width) / 2.0;
+        let text_y = rect.y() + (rect.height() + font_size * 0.7) / 2.0;
         painter.draw_text(&self.label, Point::new(text_x, text_y), text_color, font_size);
 
-        // Focus ring
+        // Focus ring (Tailwind-style ring with offset)
         if self.base.state.focused && ctx.focus_visible {
-            let ring_rect = rect.offset(-2.0, -2.0);
+            let ring_offset = 2.0;
             let ring_rect = Rect::new(
-                ring_rect.x(),
-                ring_rect.y(),
-                rect.width() + 4.0,
-                rect.height() + 4.0,
+                rect.x() - ring_offset,
+                rect.y() - ring_offset,
+                rect.width() + ring_offset * 2.0,
+                rect.height() + ring_offset * 2.0,
             );
-            painter.stroke_rect(ring_rect, theme.colors.ring, 2.0);
+            let ring_radius = BorderRadius::all(8.0 + ring_offset);
+            painter.stroke_rounded_rect(ring_rect, theme.colors.ring.with_alpha(0.5), 2.0, ring_radius);
         }
     }
 

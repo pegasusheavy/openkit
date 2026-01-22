@@ -1,0 +1,685 @@
+/* ============================================
+   OpenKit Design System - Tailwind-Inspired Styles
+   A beautiful, modern design system for OpenKit
+   ============================================ */
+
+/* ============================================
+   Typography Scale
+   ============================================ */
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.subheading {
+  font-size: 22px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.caption {
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.body {
+  font-size: 16px;
+  font-weight: 400;
+  color: #334155;
+}
+
+.body-sm {
+  font-size: 14px;
+  font-weight: 400;
+  color: #475569;
+}
+
+.body-xs {
+  font-size: 13px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+/* Muted text variants */
+.text-muted {
+  color: #64748b;
+}
+
+.text-muted-foreground {
+  color: #94a3b8;
+}
+
+.text-primary {
+  color: #4f46e5;
+}
+
+.text-success {
+  color: #059669;
+}
+
+.text-warning {
+  color: #d97706;
+}
+
+.text-destructive {
+  color: #dc2626;
+}
+
+/* ============================================
+   Button Styles
+   ============================================ */
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #334155;
+  border-width: 1px;
+  border-color: #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #334155;
+  border-width: 1.5px;
+  border-color: #d1d5db;
+}
+
+.btn-outline:hover {
+  background-color: #f8fafc;
+  border-color: #9ca3af;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #475569;
+}
+
+.btn-ghost:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-destructive {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-destructive:hover {
+  background-color: #dc2626;
+}
+
+.btn-success {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #059669;
+}
+
+.btn-gradient {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+/* Button sizes */
+.btn-xs {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 17px;
+  border-radius: 14px;
+}
+
+.btn-xl {
+  padding: 20px 40px;
+  font-size: 18px;
+  border-radius: 16px;
+}
+
+.btn-icon {
+  padding: 12px;
+  border-radius: 12px;
+}
+
+/* ============================================
+   Card Styles
+   ============================================ */
+
+.card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+}
+
+.card-elevated {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.card-outlined {
+  background-color: transparent;
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: #e2e8f0;
+}
+
+.card-interactive {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.card-compact {
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.card-lg {
+  padding: 32px;
+  border-radius: 20px;
+}
+
+/* ============================================
+   Input & Form Styles
+   ============================================ */
+
+.input {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  border-width: 1.5px;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.input:focus {
+  border-color: #4f46e5;
+}
+
+.input-sm {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+.input-lg {
+  padding: 16px 22px;
+  font-size: 17px;
+  border-radius: 14px;
+}
+
+.input-filled {
+  background-color: #f1f5f9;
+  border-width: 0px;
+}
+
+.input-filled:focus {
+  background-color: #ffffff;
+  border-width: 1.5px;
+  border-color: #4f46e5;
+}
+
+/* ============================================
+   Toggle Switch Styles
+   ============================================ */
+
+.switch {
+  cursor: pointer;
+}
+
+.switch-track {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+}
+
+.switch-track-active {
+  background-color: #4f46e5;
+}
+
+.switch-thumb {
+  background-color: #ffffff;
+  border-radius: 9999px;
+}
+
+/* ============================================
+   Checkbox Styles
+   ============================================ */
+
+.checkbox {
+  border-radius: 6px;
+  border-width: 2px;
+  border-color: #d1d5db;
+  background-color: #ffffff;
+}
+
+.checkbox:checked {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.checkbox:hover {
+  border-color: #6366f1;
+}
+
+/* ============================================
+   Layout & Spacing
+   ============================================ */
+
+.container {
+  padding: 32px;
+}
+
+.container-narrow {
+  padding: 24px;
+  max-width: 640px;
+}
+
+.container-wide {
+  padding: 48px;
+}
+
+.section {
+  padding: 32px 0;
+}
+
+.section-sm {
+  padding: 16px 0;
+}
+
+.section-lg {
+  padding: 48px 0;
+}
+
+/* Gap utilities */
+.gap-xxs { gap: 4px; }
+.gap-xs { gap: 6px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-lg { gap: 16px; }
+.gap-xl { gap: 24px; }
+.gap-2xl { gap: 32px; }
+.gap-3xl { gap: 48px; }
+
+/* Spacing utilities */
+.space-y-xs { gap: 6px; }
+.space-y-sm { gap: 8px; }
+.space-y-md { gap: 12px; }
+.space-y-lg { gap: 16px; }
+.space-y-xl { gap: 24px; }
+
+/* ============================================
+   Backgrounds & Surfaces
+   ============================================ */
+
+.bg-background {
+  background-color: #ffffff;
+}
+
+.bg-surface {
+  background-color: #f8fafc;
+}
+
+.bg-surface-elevated {
+  background-color: #ffffff;
+}
+
+.bg-muted {
+  background-color: #f1f5f9;
+}
+
+.bg-primary {
+  background-color: #4f46e5;
+}
+
+.bg-primary-soft {
+  background-color: #eef2ff;
+}
+
+.bg-success-soft {
+  background-color: #dcfce7;
+}
+
+.bg-warning-soft {
+  background-color: #fef3c7;
+}
+
+.bg-destructive-soft {
+  background-color: #fee2e2;
+}
+
+/* ============================================
+   Dividers
+   ============================================ */
+
+.divider {
+  background-color: #e2e8f0;
+  height: 1px;
+}
+
+.divider-thick {
+  height: 2px;
+}
+
+/* ============================================
+   Badges & Tags
+   ============================================ */
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background-color: #eef2ff;
+  color: #4f46e5;
+}
+
+.badge-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #059669;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.badge-destructive {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.badge-outline {
+  background-color: transparent;
+  border-width: 1px;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+/* ============================================
+   Progress Indicators
+   ============================================ */
+
+.progress-track {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  height: 8px;
+}
+
+.progress-fill {
+  background-color: #4f46e5;
+  border-radius: 9999px;
+}
+
+.progress-sm {
+  height: 4px;
+}
+
+.progress-lg {
+  height: 12px;
+}
+
+.progress-success {
+  background-color: #10b981;
+}
+
+.progress-warning {
+  background-color: #f59e0b;
+}
+
+.progress-destructive {
+  background-color: #ef4444;
+}
+
+/* ============================================
+   Avatar
+   ============================================ */
+
+.avatar {
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+}
+
+.avatar-xs {
+  width: 24px;
+  height: 24px;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-md {
+  width: 40px;
+  height: 40px;
+}
+
+.avatar-lg {
+  width: 48px;
+  height: 48px;
+}
+
+.avatar-xl {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar-square {
+  border-radius: 12px;
+}
+
+/* ============================================
+   Tooltip
+   ============================================ */
+
+.tooltip {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ============================================
+   Demo-Specific Styles
+   ============================================ */
+
+.demo-root {
+  background-color: #f8fafc;
+  min-height: 100%;
+  padding: 48px;
+}
+
+.demo-container {
+  padding: 40px;
+  background-color: #f8fafc;
+}
+
+.demo-section {
+  padding: 28px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+}
+
+.demo-header {
+  padding: 40px 48px;
+  background-color: #ffffff;
+  border-radius: 24px;
+}
+
+.demo-sidebar {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 280px;
+}
+
+.feature-card {
+  padding: 24px;
+  background-color: #f8fafc;
+  border-radius: 16px;
+}
+
+.feature-card:hover {
+  background-color: #f1f5f9;
+}
+
+.stat-card {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Interactive states */
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  opacity: 0.9;
+}
+
+.interactive:active {
+  opacity: 0.8;
+}
+
+/* Focus ring */
+.focus-ring:focus {
+  outline-width: 2px;
+  outline-color: #4f46e5;
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Dark Mode Variants (for future use)
+   ============================================ */
+
+.dark .hero-title {
+  color: #f8fafc;
+}
+
+.dark .title {
+  color: #f1f5f9;
+}
+
+.dark .heading {
+  color: #f1f5f9;
+}
+
+.dark .body {
+  color: #cbd5e1;
+}
+
+.dark .card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark .bg-background {
+  background-color: #0f172a;
+}
+
+.dark .bg-surface {
+  background-color: #1e293b;
+}

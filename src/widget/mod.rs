@@ -1,31 +1,42 @@
 //! Widget system for OpenKit.
 
+pub mod address_bar;
 pub mod avatar;
 pub mod bar;
+pub mod bookmark_bar;
+pub mod browser_tab;
+pub mod browser_toolbar;
 pub mod button;
 pub mod card;
 pub mod checkbox;
 pub mod clock;
 pub mod container;
 pub mod context_menu;
+pub mod data_table;
 pub mod desktop;
 pub mod dropdown;
+pub mod find_bar;
 pub mod icon_button;
 pub mod label;
 pub mod list_view;
+pub mod menu_bar;
 pub mod notification;
 pub mod password_field;
+pub mod piece_map;
 pub mod progress;
 pub mod scroll_view;
 pub mod separator;
 pub mod slider;
 pub mod spacer;
+pub mod speed_graph;
 pub mod spinner;
+pub mod split_pane;
 pub mod switch;
 pub mod system_tray;
 pub mod tabs;
 pub mod textfield;
 pub mod tooltip;
+pub mod tree_view;
 pub mod window;
 pub mod workspace;
 
@@ -152,10 +163,27 @@ impl<'a> PaintContext<'a> {
 }
 
 /// Context for event handling.
+/// Theme change request.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ThemeRequest {
+    /// No change requested
+    None,
+    /// Switch to light theme
+    Light,
+    /// Switch to dark theme
+    Dark,
+    /// Toggle between light and dark
+    Toggle,
+}
+
 pub struct EventContext {
     pub focus: Option<WidgetId>,
     pub mouse_position: Point,
     pub should_redraw: bool,
+    /// Requested theme change
+    pub theme_request: ThemeRequest,
+    /// Current theme is dark
+    pub is_dark_theme: bool,
 }
 
 impl EventContext {
@@ -164,6 +192,8 @@ impl EventContext {
             focus: None,
             mouse_position: Point::ZERO,
             should_redraw: false,
+            theme_request: ThemeRequest::None,
+            is_dark_theme: false,
         }
     }
 
@@ -176,6 +206,18 @@ impl EventContext {
     }
 
     pub fn request_redraw(&mut self) {
+        self.should_redraw = true;
+    }
+
+    /// Request a theme change.
+    pub fn set_theme(&mut self, dark: bool) {
+        self.theme_request = if dark { ThemeRequest::Dark } else { ThemeRequest::Light };
+        self.should_redraw = true;
+    }
+
+    /// Toggle between light and dark theme.
+    pub fn toggle_theme(&mut self) {
+        self.theme_request = ThemeRequest::Toggle;
         self.should_redraw = true;
     }
 }

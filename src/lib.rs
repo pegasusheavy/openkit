@@ -85,25 +85,31 @@ pub mod prelude {
     pub use crate::widget::checkbox::Checkbox;
     pub use crate::widget::clock::{Clock, ClockFormat, DateFormat};
     pub use crate::widget::container::{Column, Row};
-    pub use crate::widget::context_menu::{ContextMenu, MenuItem};
+    pub use crate::widget::context_menu::ContextMenu;
+    pub use crate::widget::data_table::{DataTable, TableColumn, TableRow, CellValue, BadgeVariant, ColumnAlign, ColumnWidth, SortDirection as TableSortDirection, TableSelectionMode};
     pub use crate::widget::desktop::{Desktop, DesktopIcon, Wallpaper, WallpaperMode, GradientDirection};
     pub use crate::widget::dropdown::{Dropdown, DropdownOption};
     pub use crate::widget::icon_button::{IconButton, IconButtonSize, IconButtonVariant};
     pub use crate::widget::label::Label;
     pub use crate::widget::list_view::{ListView, ListItem, SelectionMode};
+    pub use crate::widget::menu_bar::{MenuBar, Menu, MenuItem, MenuItemKind};
     pub use crate::widget::notification::{Notification, NotificationUrgency};
     pub use crate::widget::password_field::PasswordField;
+    pub use crate::widget::piece_map::{PieceMap, PieceState, PieceMapMode, PieceStats};
     pub use crate::widget::progress::{Progress, ProgressVariant, ProgressSize};
     pub use crate::widget::scroll_view::{ScrollView, ScrollBarVisibility};
     pub use crate::widget::separator::{Separator, SeparatorOrientation};
     pub use crate::widget::slider::{Slider, SliderOrientation};
     pub use crate::widget::spacer::Spacer;
+    pub use crate::widget::speed_graph::{SpeedGraph, GraphSeries, TimeScale};
     pub use crate::widget::spinner::{Spinner, SpinnerSize};
+    pub use crate::widget::split_pane::{SplitPane, SplitOrientation};
     pub use crate::widget::switch::{ToggleSwitch, ToggleSwitchSize};
     pub use crate::widget::system_tray::{SystemTray, TrayIcon};
     pub use crate::widget::tabs::{Tabs, Tab, TabPosition, TabVariant};
     pub use crate::widget::textfield::TextField;
     pub use crate::widget::tooltip::{Tooltip, TooltipPosition};
+    pub use crate::widget::tree_view::{TreeView, TreeNode, TreeSelectionMode};
     pub use crate::widget::window::{Window, WindowVariant, WindowControlsStyle};
     pub use crate::widget::workspace::{WorkspaceSwitcher, WorkspaceItem};
 
@@ -125,7 +131,7 @@ pub mod prelude {
     pub use crate::{
         // Widget macros
         view, col, row, class, style,
-        button, checkbox, textfield, label,
+        button, checkbox, textfield, label, switch,
         when, match_widget, for_each, spacer, dbg_widget,
         // Angular-like macros
         define_component, ng_if, ng_for, ng_switch,

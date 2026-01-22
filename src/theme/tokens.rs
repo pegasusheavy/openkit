@@ -9,6 +9,10 @@ pub struct ThemeColors {
     pub background: Color,
     pub foreground: Color,
 
+    // Surface (for elevated content like headers)
+    pub surface: Color,
+    pub surface_hover: Color,
+
     // Card
     pub card: Color,
     pub card_foreground: Color,
@@ -37,6 +41,14 @@ pub struct ThemeColors {
     pub destructive: Color,
     pub destructive_foreground: Color,
 
+    // Status colors
+    pub success: Color,
+    pub warning: Color,
+
+    // Text colors (aliases for foreground/muted_foreground)
+    pub text_primary: Color,
+    pub text_secondary: Color,
+
     // Borders and inputs
     pub border: Color,
     pub input: Color,
@@ -49,6 +61,9 @@ impl ThemeColors {
         Self {
             background: Color::from_hsl(0.0, 0.0, 100.0),
             foreground: Color::from_hsl(222.2, 84.0, 4.9),
+
+            surface: Color::from_hsl(210.0, 40.0, 98.0),
+            surface_hover: Color::from_hsl(210.0, 40.0, 96.0),
 
             card: Color::from_hsl(0.0, 0.0, 100.0),
             card_foreground: Color::from_hsl(222.2, 84.0, 4.9),
@@ -71,6 +86,12 @@ impl ThemeColors {
             destructive: Color::from_hsl(0.0, 84.2, 60.2),
             destructive_foreground: Color::from_hsl(210.0, 40.0, 98.0),
 
+            success: Color::from_hsl(142.0, 71.0, 45.0),
+            warning: Color::from_hsl(38.0, 92.0, 50.0),
+
+            text_primary: Color::from_hsl(222.2, 84.0, 4.9),
+            text_secondary: Color::from_hsl(215.4, 16.3, 46.9),
+
             border: Color::from_hsl(214.3, 31.8, 91.4),
             input: Color::from_hsl(214.3, 31.8, 91.4),
             ring: Color::from_hsl(221.2, 83.2, 53.3),
@@ -82,6 +103,9 @@ impl ThemeColors {
         Self {
             background: Color::from_hsl(222.2, 84.0, 4.9),
             foreground: Color::from_hsl(210.0, 40.0, 98.0),
+
+            surface: Color::from_hsl(217.2, 32.6, 12.0),
+            surface_hover: Color::from_hsl(217.2, 32.6, 17.5),
 
             card: Color::from_hsl(222.2, 84.0, 4.9),
             card_foreground: Color::from_hsl(210.0, 40.0, 98.0),
@@ -103,6 +127,12 @@ impl ThemeColors {
 
             destructive: Color::from_hsl(0.0, 62.8, 30.6),
             destructive_foreground: Color::from_hsl(210.0, 40.0, 98.0),
+
+            success: Color::from_hsl(142.0, 71.0, 35.0),
+            warning: Color::from_hsl(38.0, 92.0, 40.0),
+
+            text_primary: Color::from_hsl(210.0, 40.0, 98.0),
+            text_secondary: Color::from_hsl(215.0, 20.2, 65.1),
 
             border: Color::from_hsl(217.2, 32.6, 17.5),
             input: Color::from_hsl(217.2, 32.6, 17.5),

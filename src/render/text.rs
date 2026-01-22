@@ -1,7 +1,7 @@
 //! Text rendering using cosmic-text.
 
 use crate::geometry::Size;
-use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping, SwashCache};
+use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping, SwashCache, SwashContent};
 use std::sync::{Arc, Mutex};
 
 /// Text renderer using cosmic-text.
@@ -84,21 +84,98 @@ impl TextRenderer {
                 let physical_glyph = glyph.physical((0.0, 0.0), 1.0);
 
                 if let Some(image) = self.swash_cache.get_image(&mut font_system, physical_glyph.cache_key) {
-                    let glyph_x = physical_glyph.x;
-                    let glyph_y = physical_glyph.y + run.line_y as i32;
+                    let glyph_x = physical_glyph.x + image.placement.left;
+                    let glyph_y = physical_glyph.y + run.line_y as i32 - image.placement.top;
+                    let glyph_w = image.placement.width as i32;
+                    let glyph_h = image.placement.height as i32;
 
-                    for (i, alpha) in image.data.iter().enumerate() {
-                        let px = glyph_x + (i as i32 % image.placement.width as i32);
-                        let py = glyph_y + (i as i32 / image.placement.width as i32);
+                    match image.content {
+                        SwashContent::Mask => {
+                            // Grayscale alpha mask - 1 byte per pixel
+                            for gy in 0..glyph_h {
+                                for gx in 0..glyph_w {
+                                    let src_idx = (gy * glyph_w + gx) as usize;
+                                    if src_idx >= image.data.len() {
+                                        continue;
+                                    }
+                                    
+                                    let alpha = image.data[src_idx];
+                                    if alpha == 0 {
+                                        continue;
+                                    }
+                                    
+                                    let px = glyph_x + gx;
+                                    let py = glyph_y + gy;
 
-                        if px >= 0 && py >= 0 && (px as u32) < width && (py as u32) < height {
-                            let idx = ((py as u32 * width + px as u32) * 4) as usize;
-                            if idx + 3 < pixels.len() {
-                                let a = *alpha as f32 / 255.0;
-                                pixels[idx] = ((color[0] as f32 * a) as u8).saturating_add(pixels[idx]);
-                                pixels[idx + 1] = ((color[1] as f32 * a) as u8).saturating_add(pixels[idx + 1]);
-                                pixels[idx + 2] = ((color[2] as f32 * a) as u8).saturating_add(pixels[idx + 2]);
-                                pixels[idx + 3] = (*alpha).saturating_add(pixels[idx + 3]);
+                                    if px >= 0 && py >= 0 && (px as u32) < width && (py as u32) < height {
+                                        let idx = ((py as u32 * width + px as u32) * 4) as usize;
+                                        if idx + 3 < pixels.len() {
+                                            let a = alpha as f32 / 255.0;
+                                            pixels[idx] = ((color[0] as f32 * a) as u8).saturating_add(pixels[idx]);
+                                            pixels[idx + 1] = ((color[1] as f32 * a) as u8).saturating_add(pixels[idx + 1]);
+                                            pixels[idx + 2] = ((color[2] as f32 * a) as u8).saturating_add(pixels[idx + 2]);
+                                            pixels[idx + 3] = alpha.saturating_add(pixels[idx + 3]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        SwashContent::Color => {
+                            // RGBA color - 4 bytes per pixel
+                            for gy in 0..glyph_h {
+                                for gx in 0..glyph_w {
+                                    let src_idx = ((gy * glyph_w + gx) * 4) as usize;
+                                    if src_idx + 3 >= image.data.len() {
+                                        continue;
+                                    }
+                                    
+                                    let px = glyph_x + gx;
+                                    let py = glyph_y + gy;
+
+                                    if px >= 0 && py >= 0 && (px as u32) < width && (py as u32) < height {
+                                        let idx = ((py as u32 * width + px as u32) * 4) as usize;
+                                        if idx + 3 < pixels.len() {
+                                            let a = image.data[src_idx + 3] as f32 / 255.0;
+                                            if a > 0.0 {
+                                                pixels[idx] = ((image.data[src_idx] as f32 * a) as u8).saturating_add(pixels[idx]);
+                                                pixels[idx + 1] = ((image.data[src_idx + 1] as f32 * a) as u8).saturating_add(pixels[idx + 1]);
+                                                pixels[idx + 2] = ((image.data[src_idx + 2] as f32 * a) as u8).saturating_add(pixels[idx + 2]);
+                                                pixels[idx + 3] = image.data[src_idx + 3].saturating_add(pixels[idx + 3]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        SwashContent::SubpixelMask => {
+                            // Subpixel RGB - 3 bytes per pixel, treat as grayscale for now
+                            for gy in 0..glyph_h {
+                                for gx in 0..glyph_w {
+                                    let src_idx = ((gy * glyph_w + gx) * 3) as usize;
+                                    if src_idx + 2 >= image.data.len() {
+                                        continue;
+                                    }
+                                    
+                                    // Average the RGB subpixel values for grayscale alpha
+                                    let alpha = ((image.data[src_idx] as u16 + image.data[src_idx + 1] as u16 + image.data[src_idx + 2] as u16) / 3) as u8;
+                                    if alpha == 0 {
+                                        continue;
+                                    }
+                                    
+                                    let px = glyph_x + gx;
+                                    let py = glyph_y + gy;
+
+                                    if px >= 0 && py >= 0 && (px as u32) < width && (py as u32) < height {
+                                        let idx = ((py as u32 * width + px as u32) * 4) as usize;
+                                        if idx + 3 < pixels.len() {
+                                            let a = alpha as f32 / 255.0;
+                                            pixels[idx] = ((color[0] as f32 * a) as u8).saturating_add(pixels[idx]);
+                                            pixels[idx + 1] = ((color[1] as f32 * a) as u8).saturating_add(pixels[idx + 1]);
+                                            pixels[idx + 2] = ((color[2] as f32 * a) as u8).saturating_add(pixels[idx + 2]);
+                                            pixels[idx + 3] = alpha.saturating_add(pixels[idx + 3]);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

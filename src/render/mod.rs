@@ -28,6 +28,10 @@ pub struct Renderer {
     text: TextRenderer,
     /// Softbuffer surface for CPU rendering presentation
     software_surface: Option<SoftwareSurface>,
+    /// Window reference for deferred surface creation
+    window: std::sync::Arc<winit::window::Window>,
+    /// Frame count for initial frames (to work around X11 timing)
+    frame_count: u32,
 }
 
 /// Software surface for CPU rendering presentation using softbuffer.
@@ -38,9 +42,12 @@ struct SoftwareSurface {
 }
 
 impl SoftwareSurface {
+    #[allow(dead_code)]
     fn new(window: &Window) -> Option<Self> {
-        let arc = window.inner_arc();
-
+        Self::new_from_arc(window.inner_arc())
+    }
+    
+    fn new_from_arc(arc: std::sync::Arc<winit::window::Window>) -> Option<Self> {
         let context = match softbuffer::Context::new(arc.clone()) {
             Ok(c) => c,
             Err(e) => {
@@ -84,7 +91,11 @@ impl SoftwareSurface {
         };
 
         // Convert RGBA8 to the format softbuffer expects (0x00RRGGBB)
-        for (i, pixel) in pixels.chunks_exact(4).enumerate() {
+        let pixel_count = (width * height) as usize;
+        for (i, pixel) in pixels.chunks_exact(4).take(pixel_count).enumerate() {
+            if i >= buffer.len() {
+                break;
+            }
             let r = pixel[0] as u32;
             let g = pixel[1] as u32;
             let b = pixel[2] as u32;
@@ -101,47 +112,26 @@ impl SoftwareSurface {
 impl Renderer {
     /// Create a new renderer for a window.
     pub fn new(window: &Window) -> Self {
+        // GPU 2D rendering is not yet implemented, so we always use CPU rendering
+        // TODO: Enable GPU rendering once draw_rect, draw_line, draw_text are implemented for wgpu
         #[cfg(feature = "gpu")]
-        let gpu = match GpuRenderer::new(window) {
-            Ok(g) => {
-                log::info!("Using GPU rendering (wgpu)");
-                Some(g)
-            }
-            Err(e) => {
-                log::warn!("GPU rendering unavailable: {}. Falling back to CPU rendering.", e);
-                None
-            }
+        let gpu: Option<GpuRenderer> = {
+            log::info!("GPU 2D rendering not yet implemented, using CPU rendering (skia-rs)");
+            None
         };
 
         #[cfg(not(feature = "gpu"))]
         log::info!("Using CPU rendering (skia-rs)");
 
-        // Create software surface for CPU rendering presentation
-        let software_surface = {
-            #[cfg(feature = "gpu")]
-            {
-                if gpu.is_none() {
-                    SoftwareSurface::new(window)
-                } else {
-                    None
-                }
-            }
-            #[cfg(not(feature = "gpu"))]
-            {
-                SoftwareSurface::new(window)
-            }
-        };
-
-        if software_surface.is_some() {
-            log::info!("Software surface created for CPU rendering presentation");
-        }
-
+        // Defer software surface creation until first resize to ensure window is mapped
         Self {
             #[cfg(feature = "gpu")]
             gpu,
             cpu: CpuRenderer::new(),
             text: TextRenderer::new(),
-            software_surface,
+            software_surface: None,
+            window: window.inner_arc(),
+            frame_count: 0,
         }
     }
 
@@ -152,6 +142,21 @@ impl Renderer {
             gpu.resize(size);
         }
         self.cpu.resize(size);
+        
+        // Create software surface on first resize (when window is mapped)
+        if self.software_surface.is_none() {
+            #[cfg(feature = "gpu")]
+            let should_create = self.gpu.is_none();
+            #[cfg(not(feature = "gpu"))]
+            let should_create = true;
+            
+            if should_create {
+                self.software_surface = SoftwareSurface::new_from_arc(self.window.clone());
+                if self.software_surface.is_some() {
+                    log::info!("Software surface created for CPU rendering presentation (deferred)");
+                }
+            }
+        }
     }
 
     /// Begin a new frame.
@@ -178,6 +183,14 @@ impl Renderer {
             let size = self.cpu.size;
             surface.present(self.cpu.pixels(), size.width as u32, size.height as u32);
         }
+        
+        self.frame_count += 1;
+    }
+    
+    /// Returns true if we need to force another paint for X11 timing workaround.
+    /// Call this after end_frame() and force a repaint if it returns true.
+    pub fn needs_initial_frames(&self) -> bool {
+        self.frame_count <= 5
     }
 
     /// Get a painter for drawing.
@@ -202,6 +215,11 @@ impl Renderer {
                     // TODO: Image rendering
                     self.draw_rect(*rect, Color::from_rgb8(200, 200, 200), BorderRadius::ZERO);
                 }
+                DrawCommand::Path { rect, color, .. } => {
+                    // TODO: SVG path rendering
+                    // For now, draw a placeholder rectangle
+                    self.draw_rect(*rect, *color, BorderRadius::ZERO);
+                }
             }
         }
     }
@@ -223,7 +241,7 @@ impl Renderer {
             // GPU path
             return;
         }
-        self.cpu.draw_text(text, position, color, size, &self.text);
+        self.cpu.draw_text(text, position, color, size, &mut self.text);
     }
 
     /// Draw a line.
@@ -251,10 +269,11 @@ impl Renderer {
 pub struct GpuRenderer {
     surface: wgpu::Surface<'static>,
     device: wgpu::Device,
-    #[allow(dead_code)]
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     size: Size,
+    current_frame: Option<wgpu::SurfaceTexture>,
+    background: Color,
 }
 
 #[cfg(feature = "gpu")]
@@ -319,6 +338,8 @@ impl GpuRenderer {
             queue,
             config,
             size,
+            current_frame: None,
+            background: Color::BLACK,
         })
     }
 
@@ -331,12 +352,57 @@ impl GpuRenderer {
         }
     }
 
-    pub fn begin_frame(&mut self, _background: Color) {
-        // TODO: Start render pass with background clear
+    pub fn begin_frame(&mut self, background: Color) {
+        self.background = background;
+        
+        // Get the next frame
+        match self.surface.get_current_texture() {
+            Ok(frame) => {
+                self.current_frame = Some(frame);
+            }
+            Err(e) => {
+                log::warn!("Failed to get current texture: {}", e);
+                self.current_frame = None;
+            }
+        }
     }
 
     pub fn end_frame(&mut self) {
-        // TODO: Submit and present
+        let Some(frame) = self.current_frame.take() else {
+            return;
+        };
+
+        let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        
+        let [r, g, b, a] = self.background.to_rgba8();
+        let (r, g, b, a) = (r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, a as f64 / 255.0);
+        
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("OpenKit Render Encoder"),
+        });
+
+        // Create render pass that clears to background color
+        {
+            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("OpenKit Render Pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color { r, g, b, a }),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                occlusion_query_set: None,
+                timestamp_writes: None,
+            });
+            // Render pass drops here, ending it
+        }
+
+        // Submit and present
+        self.queue.submit(std::iter::once(encoder.finish()));
+        frame.present();
     }
 }
 
@@ -365,7 +431,14 @@ impl CpuRenderer {
 
     pub fn begin_frame(&mut self, background: Color) {
         let [r, g, b, a] = background.to_rgba8();
-        self.pixel_buffer.clear(SkiaColor::from_argb(a, r, g, b));
+        // Fill all pixels with background color (RGBA format)
+        let pixels = &mut self.pixel_buffer.pixels;
+        for chunk in pixels.chunks_exact_mut(4) {
+            chunk[0] = r;
+            chunk[1] = g;
+            chunk[2] = b;
+            chunk[3] = a;
+        }
     }
 
     pub fn end_frame(&mut self) {
@@ -373,42 +446,42 @@ impl CpuRenderer {
     }
 
     pub fn pixels(&self) -> &[u8] {
-        // Convert the pixel data to bytes
-        // PixelBuffer stores pixels as u32 (ARGB), we need to return as &[u8]
-        let pixels = &self.pixel_buffer.pixels;
-        // Safety: u32 slice can be viewed as u8 slice with 4x the length
-        unsafe {
-            std::slice::from_raw_parts(
-                pixels.as_ptr() as *const u8,
-                pixels.len() * 4,
-            )
-        }
+        // PixelBuffer.pixels is already Vec<u8> in RGBA format
+        &self.pixel_buffer.pixels
     }
 
     pub fn draw_rect(&mut self, rect: Rect, color: Color, radius: BorderRadius) {
         let [r, g, b, a] = color.to_rgba8();
-        let skia_color = SkiaColor::from_argb(a, r, g, b);
-
-        let mut paint = Paint::new();
-        paint.set_color(skia_color.into());
-        paint.set_style(Style::Fill);
-        paint.set_anti_alias(true);
-
-        let mut rasterizer = Rasterizer::new(&mut self.pixel_buffer);
-
-        let skia_rect = skia_rs_safe::core::Rect::from_xywh(
-            rect.x(),
-            rect.y(),
-            rect.width(),
-            rect.height(),
-        );
-
-        if radius.is_zero() {
-            rasterizer.fill_rect(&skia_rect, &paint);
-        } else {
-            // For rounded rects, we use fill_rect for now
-            // TODO: Implement rounded rect path when available
-            rasterizer.fill_rect(&skia_rect, &paint);
+        let _ = radius; // TODO: implement rounded corners
+        
+        // Manually fill pixels
+        let x_start = rect.x().max(0.0) as i32;
+        let y_start = rect.y().max(0.0) as i32;
+        let x_end = (rect.x() + rect.width()).min(self.size.width) as i32;
+        let y_end = (rect.y() + rect.height()).min(self.size.height) as i32;
+        let stride = self.pixel_buffer.width;
+        
+        // PixelBuffer.pixels is Vec<u8> in RGBA format (4 bytes per pixel)
+        for y in y_start..y_end {
+            for x in x_start..x_end {
+                let idx = ((y * stride + x) * 4) as usize;
+                if idx + 3 < self.pixel_buffer.pixels.len() {
+                    // Alpha blend if the color has transparency
+                    if a < 255 {
+                        let alpha = a as f32 / 255.0;
+                        let inv_alpha = 1.0 - alpha;
+                        self.pixel_buffer.pixels[idx] = (r as f32 * alpha + self.pixel_buffer.pixels[idx] as f32 * inv_alpha) as u8;
+                        self.pixel_buffer.pixels[idx + 1] = (g as f32 * alpha + self.pixel_buffer.pixels[idx + 1] as f32 * inv_alpha) as u8;
+                        self.pixel_buffer.pixels[idx + 2] = (b as f32 * alpha + self.pixel_buffer.pixels[idx + 2] as f32 * inv_alpha) as u8;
+                        self.pixel_buffer.pixels[idx + 3] = 255; // Result is opaque
+                    } else {
+                        self.pixel_buffer.pixels[idx] = r;
+                        self.pixel_buffer.pixels[idx + 1] = g;
+                        self.pixel_buffer.pixels[idx + 2] = b;
+                        self.pixel_buffer.pixels[idx + 3] = a;
+                    }
+                }
+            }
         }
     }
 
@@ -429,10 +502,51 @@ impl CpuRenderer {
         rasterizer.draw_line(p0, p1, &paint);
     }
 
-    pub fn draw_text(&mut self, _text: &str, _position: Point, _color: Color, _size: f32, _text_renderer: &TextRenderer) {
-        // Text rendering requires the full canvas API with fonts
-        // For now, use the TextRenderer from cosmic-text for text
-        // TODO: Integrate skia-rs text rendering when available in raster backend
+    pub fn draw_text(&mut self, text: &str, position: Point, color: Color, size: f32, text_renderer: &mut TextRenderer) {
+        if text.is_empty() {
+            return;
+        }
+        
+        let [r, g, b, a] = color.to_rgba8();
+        
+        // Rasterize the text using cosmic-text
+        let (text_width, text_height, text_pixels) = text_renderer.rasterize(text, size, [r, g, b, a]);
+        
+        if text_width == 0 || text_height == 0 {
+            return;
+        }
+        
+        // Blit text pixels to the pixel buffer
+        // position.y is the baseline, so offset up by most of the text height
+        let dest_x = position.x as i32;
+        let dest_y = (position.y - size * 0.8) as i32;
+        let stride = self.pixel_buffer.width;
+        let dest_pixels = &mut self.pixel_buffer.pixels;
+        
+        for ty in 0..text_height as i32 {
+            for tx in 0..text_width as i32 {
+                let src_idx = ((ty as u32 * text_width + tx as u32) * 4) as usize;
+                let dx = dest_x + tx;
+                let dy = dest_y + ty;
+                
+                if dx >= 0 && dy >= 0 && dx < stride && dy < (self.size.height as i32) {
+                    let dest_idx = ((dy * stride + dx) * 4) as usize;
+                    
+                    if src_idx + 3 < text_pixels.len() && dest_idx + 3 < dest_pixels.len() {
+                        let src_a = text_pixels[src_idx + 3] as f32 / 255.0;
+                        
+                        if src_a > 0.0 {
+                            // Alpha blend
+                            let inv_a = 1.0 - src_a;
+                            dest_pixels[dest_idx] = (text_pixels[src_idx] as f32 + dest_pixels[dest_idx] as f32 * inv_a) as u8;
+                            dest_pixels[dest_idx + 1] = (text_pixels[src_idx + 1] as f32 + dest_pixels[dest_idx + 1] as f32 * inv_a) as u8;
+                            dest_pixels[dest_idx + 2] = (text_pixels[src_idx + 2] as f32 + dest_pixels[dest_idx + 2] as f32 * inv_a) as u8;
+                            dest_pixels[dest_idx + 3] = (text_pixels[src_idx + 3] as f32 + dest_pixels[dest_idx + 3] as f32 * inv_a) as u8;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

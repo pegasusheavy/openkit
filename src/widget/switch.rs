@@ -52,6 +52,11 @@ impl ToggleSwitchSize {
 /// let dark_mode = ToggleSwitch::new()
 ///     .checked(false)
 ///     .size(ToggleSwitchSize::Small);
+///
+/// // Theme toggle switch
+/// let theme_switch = ToggleSwitch::new()
+///     .label("Dark Mode")
+///     .theme_toggle(true);  // This will toggle app theme when switched
 /// ```
 pub struct ToggleSwitch {
     base: WidgetBase,
@@ -60,6 +65,8 @@ pub struct ToggleSwitch {
     size: ToggleSwitchSize,
     disabled: bool,
     on_change: Option<Box<dyn Fn(bool) + Send + Sync>>,
+    /// If true, toggling this switch will change the app theme
+    is_theme_toggle: bool,
 }
 
 impl ToggleSwitch {
@@ -72,7 +79,15 @@ impl ToggleSwitch {
             size: ToggleSwitchSize::default(),
             disabled: false,
             on_change: None,
+            is_theme_toggle: false,
         }
+    }
+
+    /// Make this switch toggle the app theme (dark/light mode).
+    /// When enabled, toggling this switch will change the entire app's color scheme.
+    pub fn theme_toggle(mut self, enabled: bool) -> Self {
+        self.is_theme_toggle = enabled;
+        self
     }
 
     /// Set the checked state.
@@ -288,6 +303,12 @@ impl Widget for ToggleSwitch {
                 }
                 MouseEventKind::Up if mouse.button == Some(MouseButton::Left) && in_bounds => {
                     self.toggle();
+                    
+                    // If this is a theme toggle, change the app theme
+                    if self.is_theme_toggle {
+                        ctx.set_theme(self.checked);
+                    }
+                    
                     ctx.request_redraw();
                     return EventResult::Handled;
                 }

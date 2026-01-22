@@ -42,8 +42,15 @@ impl Painter {
 
     /// Draw a stroked rectangle.
     pub fn stroke_rect(&mut self, rect: Rect, color: Color, width: f32) {
+        self.stroke_rounded_rect(rect, color, width, BorderRadius::ZERO);
+    }
+
+    /// Draw a stroked rounded rectangle.
+    /// Note: Currently draws as a regular rectangle stroke; full rounded support is TODO.
+    pub fn stroke_rounded_rect(&mut self, rect: Rect, color: Color, width: f32, _radius: BorderRadius) {
         let rect = self.transform_rect(rect);
         // Draw four lines for the stroke
+        // TODO: Implement actual rounded corner stroking
         self.draw_line(
             Point::new(rect.x(), rect.y()),
             Point::new(rect.max_x(), rect.y()),
@@ -92,6 +99,23 @@ impl Painter {
     pub fn draw_image(&mut self, rect: Rect, image_id: u64) {
         let rect = self.transform_rect(rect);
         self.commands.push(DrawCommand::Image { rect, image_id });
+    }
+
+    /// Draw an SVG path icon at the specified position and size.
+    pub fn draw_icon(&mut self, path: &str, position: Point, size: f32, color: Color, viewbox: (f32, f32, f32, f32)) {
+        let rect = Rect::new(position.x, position.y, size, size);
+        self.draw_path(path, rect, color, viewbox);
+    }
+
+    /// Draw an SVG path within the specified rectangle.
+    pub fn draw_path(&mut self, path: &str, rect: Rect, color: Color, viewbox: (f32, f32, f32, f32)) {
+        let rect = self.transform_rect(rect);
+        self.commands.push(DrawCommand::Path {
+            path: path.to_string(),
+            rect,
+            color,
+            viewbox,
+        });
     }
 
     /// Push a clip rectangle.
@@ -176,6 +200,12 @@ pub enum DrawCommand {
     Image {
         rect: Rect,
         image_id: u64,
+    },
+    Path {
+        path: String,
+        rect: Rect,
+        color: Color,
+        viewbox: (f32, f32, f32, f32),
     },
 }
 

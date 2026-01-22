@@ -1,0 +1,577 @@
+@import "tailwindcss";
+
+/* ============================================
+   OpenKit Design System - Powered by Tailwind CSS 4
+   ============================================ */
+
+/* CSS Custom Properties (Design Tokens) */
+@theme {
+  /* Colors - Beautiful modern palette */
+  --color-primary-50: oklch(0.97 0.02 250);
+  --color-primary-100: oklch(0.93 0.04 250);
+  --color-primary-200: oklch(0.86 0.08 250);
+  --color-primary-300: oklch(0.76 0.12 250);
+  --color-primary-400: oklch(0.66 0.16 250);
+  --color-primary-500: oklch(0.55 0.20 250);
+  --color-primary-600: oklch(0.48 0.22 250);
+  --color-primary-700: oklch(0.40 0.20 250);
+  --color-primary-800: oklch(0.34 0.16 250);
+  --color-primary-900: oklch(0.28 0.12 250);
+  
+  /* Accent - Vibrant purple/violet */
+  --color-accent-500: oklch(0.60 0.24 290);
+  --color-accent-600: oklch(0.52 0.26 290);
+  
+  /* Destructive - Modern red */
+  --color-destructive-500: oklch(0.58 0.22 25);
+  --color-destructive-600: oklch(0.50 0.24 25);
+  
+  /* Success - Fresh green */
+  --color-success-500: oklch(0.65 0.18 145);
+  --color-success-600: oklch(0.55 0.20 145);
+  
+  /* Warning - Warm amber */
+  --color-warning-500: oklch(0.75 0.16 75);
+  --color-warning-600: oklch(0.65 0.18 75);
+  
+  /* Neutral grays with slight blue tint */
+  --color-gray-50: oklch(0.985 0.002 250);
+  --color-gray-100: oklch(0.965 0.004 250);
+  --color-gray-200: oklch(0.925 0.006 250);
+  --color-gray-300: oklch(0.865 0.008 250);
+  --color-gray-400: oklch(0.705 0.012 250);
+  --color-gray-500: oklch(0.555 0.014 250);
+  --color-gray-600: oklch(0.445 0.014 250);
+  --color-gray-700: oklch(0.365 0.012 250);
+  --color-gray-800: oklch(0.275 0.010 250);
+  --color-gray-900: oklch(0.205 0.008 250);
+  --color-gray-950: oklch(0.145 0.006 250);
+
+  /* Spacing scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #1a1a2e;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #1a1a2e;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1a1a2e;
+}
+
+.subheading {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #2d2d44;
+}
+
+.subtitle {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.body-sm {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #475569;
+}
+
+/* ============================================
+   Button Styles
+   ============================================ */
+
+.button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #334155;
+  border-width: 1px;
+  border-color: #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #334155;
+  border-width: 1px;
+  border-color: #d1d5db;
+}
+
+.btn-outline:hover {
+  background-color: #f8fafc;
+  border-color: #9ca3af;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #475569;
+}
+
+.btn-ghost:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-destructive {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-destructive:hover {
+  background-color: #dc2626;
+}
+
+.btn-success {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.btn-gradient {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+/* Button sizes */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
+.btn-xl {
+  padding: 18px 36px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+
+/* ============================================
+   Card Styles
+   ============================================ */
+
+.card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+}
+
+.card-elevated {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.card-outlined {
+  background-color: transparent;
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: #e2e8f0;
+}
+
+.card-glass {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 24px;
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   Input & Form Styles
+   ============================================ */
+
+.input {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 15px;
+  border-width: 1px;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  outline-width: 2px;
+  outline-color: rgba(99, 102, 241, 0.2);
+  outline-offset: 0px;
+}
+
+.input-lg {
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
+.textfield {
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 15px;
+  border-width: 1px;
+  border-color: #e2e8f0;
+}
+
+.textfield:focus {
+  background-color: #ffffff;
+  border-color: #4f46e5;
+}
+
+/* ============================================
+   Toggle Switch Styles
+   ============================================ */
+
+.toggle-switch {
+  cursor: pointer;
+}
+
+.switch-track {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+}
+
+.switch-track-active {
+  background-color: #4f46e5;
+}
+
+.switch-thumb {
+  background-color: #ffffff;
+  border-radius: 9999px;
+}
+
+/* ============================================
+   Checkbox Styles
+   ============================================ */
+
+.checkbox {
+  border-radius: 6px;
+  border-width: 2px;
+  border-color: #d1d5db;
+  background-color: #ffffff;
+}
+
+.checkbox:checked {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.checkbox:hover {
+  border-color: #6366f1;
+}
+
+/* ============================================
+   Container & Layout
+   ============================================ */
+
+.container {
+  padding: 32px;
+}
+
+.container-sm {
+  padding: 24px;
+}
+
+.container-lg {
+  padding: 48px;
+}
+
+.section {
+  padding: 24px 0;
+}
+
+.divider {
+  background-color: #e2e8f0;
+  height: 1px;
+}
+
+/* Flex utilities */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Gap utilities */
+.gap-xs { gap: 4px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-lg { gap: 16px; }
+.gap-xl { gap: 24px; }
+.gap-2xl { gap: 32px; }
+
+/* ============================================
+   Backgrounds & Surfaces
+   ============================================ */
+
+.bg-surface {
+  background-color: #ffffff;
+}
+
+.bg-surface-secondary {
+  background-color: #f8fafc;
+}
+
+.bg-surface-tertiary {
+  background-color: #f1f5f9;
+}
+
+.bg-gradient-primary {
+  background-color: #4f46e5;
+}
+
+.bg-gradient-accent {
+  background-color: #8b5cf6;
+}
+
+.bg-muted {
+  background-color: #f1f5f9;
+}
+
+/* ============================================
+   Badges & Tags
+   ============================================ */
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background-color: #eef2ff;
+  color: #4f46e5;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* ============================================
+   Progress & Loading
+   ============================================ */
+
+.progress-track {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  height: 8px;
+}
+
+.progress-fill {
+  background-color: #4f46e5;
+  border-radius: 9999px;
+}
+
+.progress-success {
+  background-color: #22c55e;
+}
+
+/* ============================================
+   Avatar
+   ============================================ */
+
+.avatar {
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-md {
+  width: 40px;
+  height: 40px;
+}
+
+.avatar-lg {
+  width: 48px;
+  height: 48px;
+}
+
+/* ============================================
+   Tooltip
+   ============================================ */
+
+.tooltip {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* ============================================
+   Demo-specific styles
+   ============================================ */
+
+.demo-container {
+  padding: 40px;
+  background-color: #fafbfc;
+  min-height: 100%;
+}
+
+.demo-section {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border-width: 1px;
+  border-color: #f1f5f9;
+}
+
+.demo-header {
+  padding: 32px 40px;
+  background-color: #ffffff;
+  border-radius: 20px;
+}
+
+.feature-card {
+  padding: 20px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+}
+
+.feature-card:hover {
+  background-color: #f1f5f9;
+}
+
+/* Interactive states */
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  opacity: 0.9;
+}
+
+.interactive:active {
+  opacity: 0.8;
+}
+
+/* Focus ring */
+.focus-ring:focus {
+  outline-width: 2px;
+  outline-color: #6366f1;
+  outline-offset: 2px;
+}

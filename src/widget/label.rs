@@ -49,6 +49,43 @@ impl Label {
     pub fn set_text(&mut self, text: impl Into<String>) {
         self.text = text.into();
     }
+    
+    /// Get font size based on CSS class (built-in typography support).
+    fn font_size_for_class(&self) -> Option<f32> {
+        let classes = &self.base.classes;
+        
+        // Tailwind-inspired typography classes (check largest to smallest)
+        if classes.contains("hero-title") || classes.contains("text-4xl") {
+            Some(36.0)
+        } else if classes.contains("title") || classes.contains("text-3xl") || classes.contains("h1") {
+            Some(30.0)
+        } else if classes.contains("heading") || classes.contains("text-2xl") || classes.contains("h2") {
+            Some(24.0)
+        } else if classes.contains("subheading") || classes.contains("text-xl") || classes.contains("h3") {
+            Some(20.0)
+        } else if classes.contains("text-lg") {
+            Some(18.0)
+        } else if classes.contains("text-sm") || classes.contains("subtitle") {
+            Some(14.0)
+        } else if classes.contains("text-xs") || classes.contains("section-title") || classes.contains("caption") {
+            Some(12.0)
+        } else {
+            None
+        }
+    }
+    
+    /// Get opacity based on CSS class.
+    fn opacity_for_class(&self) -> f32 {
+        let classes = &self.base.classes;
+        
+        if classes.contains("subtitle") || classes.contains("muted") {
+            0.7
+        } else if classes.contains("section-title") || classes.contains("caption") {
+            0.5
+        } else {
+            1.0
+        }
+    }
 }
 
 impl Widget for Label {
@@ -73,11 +110,13 @@ impl Widget for Label {
     }
 
     fn intrinsic_size(&self, _ctx: &LayoutContext) -> Size {
-        // Estimate text size based on font size
-        let style = self.computed_style.as_ref().map(|s| s.font_size).unwrap_or(16.0);
-        let char_width = style * 0.6; // Approximate average character width
+        // Use class-based font size or default
+        let font_size = self.font_size_for_class()
+            .or_else(|| self.computed_style.as_ref().map(|s| s.font_size))
+            .unwrap_or(16.0);
+        let char_width = font_size * 0.6; // Approximate average character width
         let width = self.text.len() as f32 * char_width;
-        let height = style * 1.5; // Line height
+        let height = font_size * 1.5; // Line height
         Size::new(width, height)
     }
 
@@ -89,9 +128,23 @@ impl Widget for Label {
     }
 
     fn paint(&self, painter: &mut Painter, rect: Rect, ctx: &PaintContext) {
-        let style = self.computed_style.as_ref();
-        let color = style.map(|s| s.color).unwrap_or(ctx.style_ctx.theme.colors.foreground);
-        let font_size = style.map(|s| s.font_size).unwrap_or(16.0);
+        // Use class-based font size or computed/default
+        let font_size = self.font_size_for_class()
+            .or_else(|| self.computed_style.as_ref().map(|s| s.font_size))
+            .unwrap_or(16.0);
+        
+        // Base color from theme
+        let base_color = self.computed_style.as_ref()
+            .map(|s| s.color)
+            .unwrap_or(ctx.style_ctx.theme.colors.foreground);
+        
+        // Apply opacity for muted text
+        let opacity = self.opacity_for_class();
+        let color = if opacity < 1.0 {
+            base_color.with_alpha(opacity)
+        } else {
+            base_color
+        };
 
         // Draw text at the baseline
         let baseline_y = rect.y() + font_size;

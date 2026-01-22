@@ -317,6 +317,11 @@ macro_rules! style {
 /// let btn = button!("Delete", Destructive, {
 ///     println!("Deleting...");
 /// });
+///
+/// // With CSS class
+/// let btn = button!("Submit", class: "btn btn-primary", {
+///     println!("Submitting...");
+/// });
 /// ```
 #[macro_export]
 macro_rules! button {
@@ -326,11 +331,24 @@ macro_rules! button {
             .on_click(move || { $($body)* })
     };
 
+    // Button with CSS class and handler
+    ($label:expr, class: $class:expr, { $($body:tt)* }) => {
+        $crate::widget::button::Button::new($label)
+            .class($class)
+            .on_click(move || { $($body)* })
+    };
+
     // Button with variant and handler
     ($label:expr, $variant:ident, { $($body:tt)* }) => {
         $crate::widget::button::Button::new($label)
             .variant($crate::widget::button::ButtonVariant::$variant)
             .on_click(move || { $($body)* })
+    };
+
+    // Button with CSS class only
+    ($label:expr, class: $class:expr) => {
+        $crate::widget::button::Button::new($label)
+            .class($class)
     };
 
     // Button without handler
@@ -399,6 +417,9 @@ macro_rules! checkbox {
 /// let field = textfield!("Search...", "initial query", |value| {
 ///     println!("Search: {}", value);
 /// });
+///
+/// // With CSS class
+/// let field = textfield!("Search...", class: "input input-lg");
 /// ```
 #[macro_export]
 macro_rules! textfield {
@@ -406,6 +427,21 @@ macro_rules! textfield {
     ($placeholder:expr, |$var:ident| $($body:tt)*) => {
         $crate::widget::textfield::TextField::new()
             .placeholder($placeholder)
+            .on_change(move |$var| { $($body)* })
+    };
+
+    // Placeholder with CSS class
+    ($placeholder:expr, class: $class:expr) => {
+        $crate::widget::textfield::TextField::new()
+            .placeholder($placeholder)
+            .class($class)
+    };
+
+    // Placeholder with CSS class and handler
+    ($placeholder:expr, class: $class:expr, |$var:ident| $($body:tt)*) => {
+        $crate::widget::textfield::TextField::new()
+            .placeholder($placeholder)
+            .class($class)
             .on_change(move |$var| { $($body)* })
     };
 
@@ -534,6 +570,50 @@ macro_rules! for_each {
     ($iter:expr, |$idx:ident, $item:ident| $widget:expr) => {{
         $iter.into_iter().enumerate().map(|($idx, $item)| $widget).collect::<Vec<_>>()
     }};
+}
+
+/// Create a toggle switch with label and change handler.
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// use openkit::prelude::*;
+///
+/// let sw = switch!("Dark Mode", |enabled| {
+///     println!("Dark mode: {}", enabled);
+/// });
+///
+/// // Pre-enabled
+/// let sw = switch!("Wi-Fi", true, |enabled| {
+///     println!("Wi-Fi: {}", enabled);
+/// });
+/// ```
+#[macro_export]
+macro_rules! switch {
+    // With label and handler
+    ($label:expr, |$var:ident| $($body:tt)*) => {
+        $crate::widget::switch::ToggleSwitch::new()
+            .label($label)
+            .on_change(move |$var| { $($body)* })
+    };
+
+    // With label, initial state, and handler
+    ($label:expr, $checked:expr, |$var:ident| $($body:tt)*) => {
+        $crate::widget::switch::ToggleSwitch::new()
+            .label($label)
+            .checked($checked)
+            .on_change(move |$var| { $($body)* })
+    };
+
+    // Just label
+    ($label:expr) => {
+        $crate::widget::switch::ToggleSwitch::new().label($label)
+    };
+
+    // Just label and initial state
+    ($label:expr, $checked:expr) => {
+        $crate::widget::switch::ToggleSwitch::new().label($label).checked($checked)
+    };
 }
 
 /// Create a spacer widget that expands to fill available space.

@@ -22,9 +22,16 @@ gpu = ["wgpu"]
 macros = ["openkit-macros"]
 
 [dependencies]
+# ============================================================================
+# OpenKit is a FULLY CUSTOM-RENDERED UI toolkit - NO GTK, NO Qt, NO native widgets
+# All rendering is done via wgpu (GPU) or skia-rs (CPU) + softbuffer presentation
+# Windowing uses winit which talks directly to X11/Wayland/Win32/Cocoa
+# ============================================================================
+
 # Proc macros (optional, enabled by default)
 openkit-macros = { version = "0.1.2", path = "openkit-macros", optional = true }
-# Windowing
+
+# Windowing - pure Rust, talks directly to display servers (no GTK/Qt)
 winit = "0.30"
 
 # GPU Rendering (optional, enabled by default)
@@ -33,8 +40,11 @@ wgpu = { version = "23", optional = true }
 # CPU Rendering (pure Rust Skia reimplementation)
 skia-rs-safe = "0.1"
 
-# Software buffer for CPU rendering presentation
-softbuffer = "0.4"
+# Software buffer for CPU rendering presentation (X11 and Wayland native, no GTK)
+softbuffer = { version = "0.4", features = ["x11", "x11-dlopen", "wayland", "wayland-dlopen"] }
+
+# Alternative framebuffer for debugging
+minifb = "0.27"
 
 # Text rendering
 cosmic-text = "0.12"
@@ -88,3 +98,7 @@ path = "examples/angular_style.rs"
 [[example]]
 name = "custom_css"
 path = "examples/custom_css.rs"
+
+[[example]]
+name = "softbuffer_test"
+path = "examples/softbuffer_test.rs"

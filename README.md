@@ -74,7 +74,53 @@ OpenKit includes a comprehensive widget set:
 
 ## Styling
 
-Style widgets with CSS:
+OpenKit uses a Tailwind CSS-inspired design system. Style widgets with CSS classes:
+
+```rust
+use openkit::prelude::*;
+
+fn main() {
+    App::new()
+        .load_css_file("styles/openkit-design.css")
+        .run(|| {
+            col![16;
+                label!("Welcome", class: "hero-title"),
+                label!("A modern UI toolkit", class: "subtitle"),
+                button!("Get Started", Primary),
+                button!("Learn More", Outline),
+            ]
+        });
+}
+```
+
+### Using Tailwind CSS 4
+
+OpenKit includes Tailwind CSS 4 for generating beautiful, consistent styles:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build CSS
+pnpm run build
+
+# Watch for changes
+pnpm run watch
+```
+
+### CSS Classes
+
+The design system includes classes for:
+
+- **Typography**: `hero-title`, `title`, `heading`, `subtitle`, `body`, `caption`, `section-title`
+- **Buttons**: `btn-primary`, `btn-secondary`, `btn-outline`, `btn-ghost`, `btn-destructive`
+- **Cards**: `card`, `card-elevated`, `card-outlined`, `card-interactive`
+- **Badges**: `badge-primary`, `badge-success`, `badge-warning`, `badge-destructive`
+- **Layout**: `demo-section`, `demo-container`, `stat-card`
+
+### Custom CSS
+
+You can also write custom CSS:
 
 ```rust
 use openkit::prelude::*;
@@ -83,12 +129,9 @@ fn main() {
     App::new()
         .load_css(r#"
             .my-button {
-                background: linear-gradient(to-right, #667eea, #764ba2);
-                border-radius: 8px;
+                background-color: #4f46e5;
+                border-radius: 12px;
                 padding: 12px 24px;
-            }
-            .my-button:hover {
-                transform: scale(1.05);
             }
         "#)
         .run(|| {

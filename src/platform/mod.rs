@@ -42,6 +42,7 @@ impl Platform {
 
         let mut app = PlatformApp {
             handler: Box::new(handler),
+            cursor_position: Point::ZERO,
         };
 
         event_loop
@@ -79,6 +80,8 @@ pub enum PlatformEvent {
 #[allow(clippy::type_complexity)]
 struct PlatformApp {
     handler: Box<dyn FnMut(&ActiveEventLoop, PlatformEvent)>,
+    /// Last known cursor position for mouse input events
+    cursor_position: Point,
 }
 
 impl ApplicationHandler for PlatformApp {
@@ -115,21 +118,20 @@ impl ApplicationHandler for PlatformApp {
                 Some(Event::Window(WindowEvent::ThemeChanged { dark }))
             }
             WinitWindowEvent::CursorMoved { position, .. } => {
-                Some(Event::Mouse(MouseEvent::new(
-                    MouseEventKind::Move,
-                    Point::new(position.x as f32, position.y as f32),
-                )))
+                let pos = Point::new(position.x as f32, position.y as f32);
+                self.cursor_position = pos;
+                Some(Event::Mouse(MouseEvent::new(MouseEventKind::Move, pos)))
             }
             WinitWindowEvent::CursorEntered { .. } => {
                 Some(Event::Mouse(MouseEvent::new(
                     MouseEventKind::Enter,
-                    Point::ZERO,
+                    self.cursor_position,
                 )))
             }
             WinitWindowEvent::CursorLeft { .. } => {
                 Some(Event::Mouse(MouseEvent::new(
                     MouseEventKind::Leave,
-                    Point::ZERO,
+                    self.cursor_position,
                 )))
             }
             WinitWindowEvent::MouseInput { state, button, .. } => {
@@ -146,7 +148,7 @@ impl ApplicationHandler for PlatformApp {
                     winit::event::MouseButton::Other(id) => MouseButton::Other(id),
                 };
                 Some(Event::Mouse(
-                    MouseEvent::new(kind, Point::ZERO).with_button(button),
+                    MouseEvent::new(kind, self.cursor_position).with_button(button),
                 ))
             }
             WinitWindowEvent::MouseWheel { delta, .. } => {
@@ -160,7 +162,7 @@ impl ApplicationHandler for PlatformApp {
                 };
                 Some(Event::Mouse(MouseEvent {
                     kind: MouseEventKind::Scroll { delta_x, delta_y },
-                    position: Point::ZERO,
+                    position: self.cursor_position,
                     button: None,
                     modifiers: Modifiers::empty(),
                 }))
